@@ -3,294 +3,298 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 自動化工作流 — Prototype Demo</title>
+<title>AI 自動化工作流平台 — Prototype</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
 body { font-family: 'Noto Sans TC', sans-serif; background: #0f172a; color: #e2e8f0; }
-.card-dark { background: #1e293b; border: 1px solid #334155; border-radius: 12px; }
-.glow { box-shadow: 0 0 30px rgba(59,130,246,0.1); }
-.agent-card { transition: all 0.2s; cursor: pointer; border: 1px solid #334155; }
-.agent-card:hover { border-color: #3b82f6; box-shadow: 0 0 20px rgba(59,130,246,0.15); }
-.agent-card.active { border-color: #3b82f6; background: #1e3a5f; }
-.pipeline-node { background: #1e293b; border: 1px solid #475569; border-radius: 8px; padding: 12px 16px; min-width: 140px; text-align: center; }
-.pipeline-arrow { color: #64748b; font-size: 20px; }
-.step-done { border-color: #22c55e; }
-.step-running { border-color: #3b82f6; animation: pulse 1.5s infinite; }
-@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
-.log-line { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; padding: 2px 0; }
-.view-tab { transition: all 0.15s; }
-.view-tab.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+.card { background: #1e293b; border:1px solid #334155; border-radius:12px; }
+.sidebar { width:220px; border-right:1px solid #334155; min-height:100vh; }
+.nav-item { color:#94a3b8; transition:all .15s; border-radius:8px; }
+.nav-item:hover,.nav-item.active { background:#1e293b; color:#fff; }
+.nav-item.active { border-left:3px solid #3b82f6; }
+.view { display:none; }
+.view.active { display:block; }
+.pipeline-node { background:#1e293b; border:1px solid #475569; border-radius:8px; padding:14px 18px; min-width:130px; text-align:center; font-size:13px; }
+.pipeline-node.done { border-color:#22c55e; }
+.pipeline-node.running { border-color:#3b82f6; animation:pulse 1.2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.badge { display:inline-block; padding:2px 8px; border-radius:12px; font-size:11px; }
 </style>
 </head>
-<body class="min-h-screen">
+<body class="flex">
 
-<!-- Top Bar -->
-<header class="border-b border-slate-700 px-6 py-4 flex items-center justify-between">
-  <div class="flex items-center gap-3">
-    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm">🤖</div>
-    <div>
-      <h1 class="font-bold">AI 自動化工作流</h1>
-      <p class="text-xs text-slate-400">AI Agent · Workflow · Automation</p>
-    </div>
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar flex-shrink-0 hidden md:block bg-[#0b1120]">
+  <div class="px-5 py-6 border-b border-slate-800">
+    <h1 class="font-bold text-lg flex items-center gap-2">🤖 AI 自動化平台</h1>
+    <p class="text-xs text-slate-500 mt-1">Workflow Automation</p>
   </div>
-  <div class="flex items-center gap-3">
-    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-    <span class="text-xs text-slate-400">系統運行中</span>
-  </div>
-</header>
-
-<div class="flex">
-
-  <!-- Sidebar -->
-  <aside class="w-56 border-r border-slate-700 p-4 space-y-1 hidden md:block">
-    <button class="view-tab active w-full text-left px-3 py-2 rounded text-sm text-slate-300" data-view="workflows">⚡ 工作流</button>
-    <button class="view-tab w-full text-left px-3 py-2 rounded text-sm text-slate-300" data-view="agents">🧠 AI Agents</button>
-    <button class="view-tab w-full text-left px-3 py-2 rounded text-sm text-slate-300" data-view="logs">📋 執行日誌</button>
-    <button class="view-tab w-full text-left px-3 py-2 rounded text-sm text-slate-300" data-view="templates">📁 模板庫</button>
+  <nav class="p-3 space-y-1 text-sm">
+    <a href="#" class="nav-item active flex items-center gap-3 px-3 py-2.5" data-view="dashboard">📊 儀表板</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="workflows">⚡ 工作流管理</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="builder">🔧 流程編輯器</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="agents">🧠 AI 模型管理</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="chat">💬 AI 對話測試</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="logs">📋 執行紀錄</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="market">🏪 模板市集</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="settings">⚙️ 系統設定</a>
   </nav>
+</aside>
 
-  <!-- Main -->
-  <main class="flex-1 p-6">
+<!-- ===== MAIN ===== -->
+<main class="flex-1 p-6">
 
-    <!-- ======== WORKFLOWS VIEW ======== -->
-    <div id="view-workflows" class="view active">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-bold">現有工作流</h2>
-        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700" onclick="showCreateWorkflow()">＋ 建立工作流</button>
-      </div>
-
-      <!-- Workflow Cards -->
-      <div class="grid md:grid-cols-2 gap-4 mb-6">
-        <div class="card-dark p-5 agent-card" onclick="switchTab('agents')">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded">啟用中</span>
-            <span class="text-xs text-slate-400">每 30 分鐘</span>
-          </div>
-          <h3 class="font-semibold mb-1">📊 社群輿情監控</h3>
-          <p class="text-xs text-slate-400 mb-3">爬取 FB/IG/GoogleMap 評論 → AI 情緒分析 → 負評自動通知</p>
-          <div class="flex gap-2">
-            <span class="text-xs bg-slate-700 px-2 py-0.5 rounded">爬蟲</span>
-            <span class="text-xs bg-slate-700 px-2 py-0.5 rounded">NLP 情緒分析</span>
-            <span class="text-xs bg-slate-700 px-2 py-0.5 rounded">LINE 通知</span>
-          </div>
-        </div>
-        <div class="card-dark p-5 agent-card" onclick="switchTab('agents')">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded">啟用中</span>
-            <span class="text-xs text-slate-400">觸發式</span>
-          </div>
-          <h3 class="font-semibold mb-1">📧 客服郵件自動分類</h3>
-          <p class="text-xs text-slate-400 mb-3">收 Gmail → AI 分類（詢價/客訴/技術）→ CRM 建單 → Slack 通知</p>
-          <div class="flex gap-2">
-            <span class="text-xs bg-slate-700 px-2 py-0.5 rounded">Gmail API</span>
-            <span class="text-xs bg-slate-700 px-2 py-0.5 rounded">GPT 分類</span>
-            <span class="text-xs bg-slate-700 px-2 py-0.5 rounded">CRM</span>
-          </div>
-        </div>
-        <div class="card-dark p-5 agent-card" onclick="switchTab('agents')">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-xs bg-amber-900 text-amber-300 px-2 py-0.5 rounded">草稿</span>
-            <span class="text-xs text-slate-400">手動觸發</span>
-          </div>
-          <h3 class="font-semibold mb-1">📄 合約文件自動比對</h3>
-          <p class="text-xs text-slate-400 mb-3">上傳 PDF → OCR → 關鍵條款萃取 → 差異比對報告</p>
-          <div class="flex gap-2">
-            <span class="text-xs bg-slate-700 px-2 py-0.5 rounded">OCR</span>
-            <span class="text-xs bg-slate-700 px-2 py-0.5 rounded">GPT 比對</span>
-            <span class="text-xs bg-slate-700 px-2 py-0.5 rounded">PDF 輸出</span>
-          </div>
-        </div>
-        <div class="card-dark p-5 agent-card" onclick="switchTab('agents')">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-xs bg-green-900 text-green-300 px-2 py-0.5 rounded">已完成</span>
-            <span class="text-xs text-slate-400">一次性</span>
-          </div>
-          <h3 class="font-semibold mb-1">🏭 機房告警自動應對</h3>
-          <p class="text-xs text-slate-400 mb-3">監控系統 Webhook → AI 判斷嚴重度 → 輕度自動處理 / 重度推播</p>
-          <div class="flex gap-2">
-            <span class="text-xs bg-slate-700 px-2 py-0.5 rounded">Webhook</span>
-            <span class="text-xs bg-slate-700 px-2 py-0.5 rounded">規則引擎</span>
-            <span class="text-xs bg-slate-700 px-2 py-0.5 rounded">Push</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pipeline Demo -->
-      <div class="card-dark p-6 glow">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold">🔄 即時工作流執行</h3>
-          <button class="text-xs bg-blue-600 px-3 py-1.5 rounded hover:bg-blue-700" onclick="runPipeline()">▶ 手動觸發</button>
-        </div>
-        <div class="flex items-center justify-center gap-2 flex-wrap" id="pipeline">
-          <div class="pipeline-node step-done"><div class="text-lg">🌐</div><div class="text-xs mt-1">資料擷取</div><div class="text-[10px] text-slate-500">完成</div></div>
-          <div class="pipeline-arrow">→</div>
-          <div class="pipeline-node step-done"><div class="text-lg">🧹</div><div class="text-xs mt-1">資料清洗</div><div class="text-[10px] text-slate-500">完成</div></div>
-          <div class="pipeline-arrow">→</div>
-          <div class="pipeline-node" id="aiNode"><div class="text-lg">🧠</div><div class="text-xs mt-1">AI 分析</div><div class="text-[10px] text-slate-500">等待中</div></div>
-          <div class="pipeline-arrow">→</div>
-          <div class="pipeline-node"><div class="text-lg">📊</div><div class="text-xs mt-1">報表產生</div><div class="text-[10px] text-slate-500">等待中</div></div>
-          <div class="pipeline-arrow">→</div>
-          <div class="pipeline-node"><div class="text-lg">📤</div><div class="text-xs mt-1">結果推送</div><div class="text-[10px] text-slate-500">等待中</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ======== AGENTS VIEW ======== -->
-    <div id="view-agents" class="view" style="display:none">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-bold">AI Agents 管理</h2>
-        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">＋ 新增 Agent</button>
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-4">
-        <div class="card-dark p-5 agent-card active">
-          <div class="text-3xl mb-3">🧠</div>
-          <h3 class="font-semibold">GPT 分類器</h3>
-          <p class="text-xs text-slate-400 mt-1 mb-3">自動分類客戶意圖：詢價/客訴/技術支援</p>
-          <div class="text-xs text-slate-500">Trigger: Gmail Webhook</div>
-          <div class="text-xs text-slate-500">Model: GPT-4o mini</div>
-          <div class="text-xs text-green-400 mt-2">● 運行中 · 本月處理 2,847 筆</div>
-        </div>
-        <div class="card-dark p-5 agent-card">
-          <div class="text-3xl mb-3">🔍</div>
-          <h3 class="font-semibold">資料爬取器</h3>
-          <p class="text-xs text-slate-400 mt-1 mb-3">定時爬取競品價格與庫存資訊</p>
-          <div class="text-xs text-slate-500">Trigger: Cron 每小時</div>
-          <div class="text-xs text-slate-500">Engine: Puppeteer + Cheerio</div>
-          <div class="text-xs text-green-400 mt-2">● 運行中 · 監控 156 個目標</div>
-        </div>
-        <div class="card-dark p-5 agent-card">
-          <div class="text-3xl mb-3">📝</div>
-          <h3 class="font-semibold">報告產生器</h3>
-          <p class="text-xs text-slate-400 mt-1 mb-3">自動彙整數據，生成 PDF/Excel 週報</p>
-          <div class="text-xs text-slate-500">Trigger: 每週一 08:00</div>
-          <div class="text-xs text-slate-500">Output: PDF + Email</div>
-          <div class="text-xs text-green-400 mt-2">● 運行中 · 下週一執行</div>
-        </div>
-        <div class="card-dark p-5 agent-card">
-          <div class="text-3xl mb-3">💬</div>
-          <h3 class="font-semibold">智能客服</h3>
-          <p class="text-xs text-slate-400 mt-1 mb-3">LINE Bot 自動回覆常見問題</p>
-          <div class="text-xs text-slate-500">Trigger: LINE Messaging API</div>
-          <div class="text-xs text-slate-500">RAG: 知識庫 230 篇</div>
-          <div class="text-xs text-green-400 mt-2">● 運行中 · 本月 3,201 次對話</div>
-        </div>
-        <div class="card-dark p-5 agent-card">
-          <div class="text-3xl mb-3">📊</div>
-          <h3 class="font-semibold">異常偵測器</h3>
-          <p class="text-xs text-slate-400 mt-1 mb-3">監控伺服器指標，異常自動告警</p>
-          <div class="text-xs text-slate-500">Trigger: Prometheus Alert</div>
-          <div class="text-xs text-slate-500">Action: Telegram/Line/SMS</div>
-          <div class="text-xs text-amber-400 mt-2">⚠ 待設定通知管道</div>
-        </div>
-        <div class="card-dark p-5 agent-card border-dashed border-blue-800 flex items-center justify-center" style="min-height:200px" onclick="alert('新 Agent 設定精靈\n\n1. 選擇觸發方式\n2. 設定 AI 模型\n3. 定義輸出動作\n\n技術棧：n8n / LangChain / CrewAI')">
-          <div class="text-center">
-            <div class="text-2xl mb-2">➕</div>
-            <p class="text-sm text-slate-500">新增自訂 Agent</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ======== LOGS VIEW ======== -->
-    <div id="view-logs" class="view" style="display:none">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-bold">執行日誌</h2>
-        <select class="bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-sm text-slate-300">
-          <option>全部 Agent</option><option>GPT 分類器</option><option>資料爬取器</option>
-        </select>
-      </div>
-      <div class="card-dark p-4 font-mono">
-        <div class="log-line text-slate-500">[2026-05-24 15:30:01] <span class="text-blue-400">[資料爬取器]</span> 開始爬取 #156 個目標</div>
-        <div class="log-line text-slate-500">[2026-05-24 15:30:12] <span class="text-blue-400">[資料爬取器]</span> 完成 142/156，4 個目標無回應</div>
-        <div class="log-line text-slate-500">[2026-05-24 15:30:15] <span class="text-green-400">[GPT 分類器]</span> 分類完成：詢價 23 封、客訴 5 封</div>
-        <div class="log-line text-red-400">[2026-05-24 15:30:18] <span class="text-amber-400">[異常偵測器]</span> WARNING: api-server CPU > 80%</div>
-        <div class="log-line text-slate-500">[2026-05-24 15:30:18] <span class="text-amber-400">[異常偵測器]</span> 已自動擴充 2 個 pod</div>
-        <div class="log-line text-slate-500">[2026-05-24 15:31:01] <span class="text-blue-400">[資料爬取器]</span> 資料已入庫，更新 2,340 筆</div>
-        <div class="log-line text-slate-500">[2026-05-24 15:35:00] <span class="text-purple-400">[報告產生器]</span> 測試報告已產生</div>
-        <div class="log-line text-slate-600">...</div>
-      </div>
-    </div>
-
-    <!-- ======== TEMPLATES VIEW ======== -->
-    <div id="view-templates" class="view" style="display:none">
-      <h2 class="text-lg font-bold mb-6">工作流模板庫</h2>
-      <div class="grid md:grid-cols-3 gap-4">
-        <div class="card-dark p-5 agent-card"><div class="text-2xl mb-2">🛒</div><h3 class="font-semibold">電商訂單自動處理</h3><p class="text-xs text-slate-400 mt-1">Shopee/WooCommerce → ERP → 出貨通知</p></div>
-        <div class="card-dark p-5 agent-card"><div class="text-2xl mb-2">📰</div><h3 class="font-semibold">新聞輿情監控</h3><p class="text-xs text-slate-400 mt-1">Google News → NLP 摘要 → Slack 推播</p></div>
-        <div class="card-dark p-5 agent-card"><div class="text-2xl mb-2">📋</div><h3 class="font-semibold">表單自動建檔</h3><p class="text-xs text-slate-400 mt-1">Google Form → AI 分類 → Notion/CRM</p></div>
-        <div class="card-dark p-5 agent-card"><div class="text-2xl mb-2">🏥</div><h3 class="font-semibold">診所病歷摘要</h3><p class="text-xs text-slate-400 mt-1">錄音 → Whisper STT → GPT 摘要 → EMR</p></div>
-        <div class="card-dark p-5 agent-card"><div class="text-2xl mb-2">📊</div><h3 class="font-semibold">週報自動產生</h3><p class="text-xs text-slate-400 mt-1">Google Analytics → GPT 分析 → Email</p></div>
-        <div class="card-dark p-5 agent-card border-dashed"><div class="text-center text-slate-500"><div class="text-2xl mb-2">➕</div><p class="text-sm">請求客製模板</p></div></div>
-      </div>
-    </div>
-
-  </main>
-</div>
-
-<!-- Create Workflow Modal -->
-<div id="create-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:100; align-items:center; justify-content:center;" onclick="this.style.display='none'">
-  <div class="card-dark p-6 max-w-lg w-full mx-4" onclick="event.stopPropagation()">
-    <h3 class="font-bold text-lg mb-4">建立新工作流</h3>
-    <div class="space-y-4 text-sm">
-      <div><label class="block mb-1">工作流名稱</label><input class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2" placeholder="例如：自動客服分類"></div>
-      <div><label class="block mb-1">觸發方式</label><select class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2"><option>Webhook</option><option>排程（Cron）</option><option>Email 觸發</option><option>手動觸發</option></select></div>
-      <div><label class="block mb-1">AI 模型</label><select class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2"><option>GPT-4o</option><option>Claude Opus 4</option><option>Gemini 2.5 Pro</option><option>自訂模型</option></select></div>
-      <div><label class="block mb-1">輸出動作</label><select class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2"><option>Email 通知</option><option>LINE 推播</option><option>Slack 訊息</option><option>Google Sheet 寫入</option></select></div>
-    </div>
-    <div class="flex gap-3 mt-6">
-      <button class="flex-1 bg-blue-600 py-2 rounded" onclick="this.closest('#create-modal').style.display='none';alert('✅ 工作流已建立！')">確認建立</button>
-      <button class="flex-1 bg-slate-700 py-2 rounded" onclick="this.closest('#create-modal').style.display='none'">取消</button>
+  <!-- HEADER -->
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-lg font-bold" id="pageTitle">📊 儀表板</h2>
+    <div class="flex items-center gap-3 text-xs text-slate-400">
+      <span class="w-2 h-2 bg-green-500 rounded-full"></span> 系統正常 · <span id="clock">--</span>
     </div>
   </div>
-</div>
+
+  <!-- ========== DASHBOARD ========== -->
+  <div id="view-dashboard" class="view active">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="card p-5"><p class="text-xs text-slate-400 mb-1">本月執行次數</p><p class="text-2xl font-bold">12,847</p><p class="text-xs text-green-400 mt-1">↑ 23% vs 上月</p></div>
+      <div class="card p-5"><p class="text-xs text-slate-400 mb-1">活躍工作流</p><p class="text-2xl font-bold">18 <span class="text-sm font-normal text-slate-400">/ 24</span></p><p class="text-xs text-amber-400 mt-1">⚠ 2 個異常</p></div>
+      <div class="card p-5"><p class="text-xs text-slate-400 mb-1">AI Token 用量</p><p class="text-2xl font-bold">3.2M</p><p class="text-xs text-slate-400 mt-1">本月預算 $128</p></div>
+      <div class="card p-5"><p class="text-xs text-slate-400 mb-1">平均延遲</p><p class="text-2xl font-bold">1.8s</p><p class="text-xs text-green-400 mt-1">↓ 0.3s</p></div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm mb-4">最近工作流執行</h3>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between py-1 border-b border-slate-800"><span>📊 社群輿情監控</span><span class="text-green-400">✓ 成功</span><span class="text-slate-500 text-xs">15:30</span></div>
+          <div class="flex justify-between py-1 border-b border-slate-800"><span>📧 客服郵件分類</span><span class="text-green-400">✓ 成功</span><span class="text-slate-500 text-xs">15:15</span></div>
+          <div class="flex justify-between py-1 border-b border-slate-800"><span>🕷 競品價格爬取</span><span class="text-amber-400">⚠ 部分失敗</span><span class="text-slate-500 text-xs">15:00</span></div>
+          <div class="flex justify-between py-1"><span>📄 週報自動產生</span><span class="text-blue-400">⏳ 排程中</span><span class="text-slate-500 text-xs">週一 08:00</span></div>
+        </div>
+      </div>
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm mb-4">AI Token 使用趨勢</h3>
+        <div class="h-32 flex items-end gap-1">
+          <div class="flex-1 bg-blue-600 rounded-t" style="height:45%"></div><div class="flex-1 bg-blue-600 rounded-t" style="height:55%"></div><div class="flex-1 bg-blue-600 rounded-t" style="height:70%"></div><div class="flex-1 bg-blue-600 rounded-t" style="height:60%"></div><div class="flex-1 bg-blue-600 rounded-t" style="height:85%"></div><div class="flex-1 bg-blue-600 rounded-t" style="height:75%"></div><div class="flex-1 bg-blue-600 rounded-t" style="height:95%"></div>
+        </div>
+        <div class="flex justify-between text-[10px] text-slate-500 mt-2"><span>週一</span><span>週二</span><span>週三</span><span>週四</span><span>週五</span><span>週六</span><span>週日</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== WORKFLOWS ========== -->
+  <div id="view-workflows" class="view">
+    <div class="flex justify-between mb-4">
+      <input type="text" placeholder="🔍 搜尋工作流..." class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm w-56">
+      <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">＋ 新增工作流</button>
+    </div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="card p-5 cursor-pointer hover:border-blue-500 transition-colors" onclick="switchView('builder')">
+        <div class="flex justify-between mb-2"><span class="badge bg-blue-900 text-blue-300">啟用</span><span class="text-xs text-slate-400">每 30 分</span></div>
+        <h3 class="font-semibold">📊 社群輿情監控</h3>
+        <p class="text-xs text-slate-400 mt-1">爬取 → NLP → 通知</p>
+        <div class="flex gap-1 mt-3"><span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded">Scrapy</span><span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded">GPT</span><span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded">LINE</span></div>
+      </div>
+      <div class="card p-5 cursor-pointer hover:border-blue-500 transition-colors">
+        <div class="flex justify-between mb-2"><span class="badge bg-blue-900 text-blue-300">啟用</span><span class="text-xs text-slate-400">Webhook</span></div>
+        <h3 class="font-semibold">📧 客服郵件自動分類</h3>
+        <p class="text-xs text-slate-400 mt-1">Gmail → GPT 分類 → CRM</p>
+        <div class="flex gap-1 mt-3"><span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded">Gmail</span><span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded">GPT-4o</span><span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded">Slack</span></div>
+      </div>
+      <div class="card p-5 cursor-pointer hover:border-blue-500 transition-colors">
+        <div class="flex justify-between mb-2"><span class="badge bg-amber-900 text-amber-300">草稿</span></div>
+        <h3 class="font-semibold">📄 合約文件比對</h3>
+        <p class="text-xs text-slate-400 mt-1">PDF → OCR → GPT 比對 → 報告</p>
+        <div class="flex gap-1 mt-3"><span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded">OCR</span><span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded">Claude</span></div>
+      </div>
+      <div class="card p-5 cursor-pointer hover:border-blue-500 transition-colors">
+        <div class="flex justify-between mb-2"><span class="badge bg-green-900 text-green-300">完成</span></div>
+        <h3 class="font-semibold">🏭 機房告警自動應對</h3>
+        <p class="text-xs text-slate-400 mt-1">Webhook → 規則 → Push</p>
+        <div class="flex gap-1 mt-3"><span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded">Webhook</span><span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded">規則引擎</span></div>
+      </div>
+      <div class="card p-5">
+        <div class="flex justify-between mb-2"><span class="badge bg-blue-900 text-blue-300">啟用</span><span class="text-xs text-slate-400">每小時</span></div>
+        <h3 class="font-semibold">🕷 競品價格監控</h3>
+        <p class="text-xs text-slate-400 mt-1">爬取 → 比對 → 異常通知</p>
+        <div class="flex gap-1 mt-3"><span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded">Puppeteer</span><span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded">+</span></div>
+      </div>
+      <div class="card p-5 border-dashed border-slate-600 flex items-center justify-center" style="min-height:150px">
+        <div class="text-center text-slate-500"><div class="text-2xl mb-2">➕</div><p class="text-sm">新增自訂工作流</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== BUILDER ========== -->
+  <div id="view-builder" class="view">
+    <div class="card p-6 mb-4">
+      <div class="flex items-center justify-between mb-4">
+        <div><h3 class="font-semibold">🔧 流程編輯器 — 社群輿情監控</h3><p class="text-xs text-slate-400 mt-1">拖曳節點以編輯流程</p></div>
+        <div class="flex gap-2"><button class="text-xs bg-slate-700 px-3 py-1.5 rounded hover:bg-slate-600">💾 儲存</button><button class="text-xs bg-blue-600 px-3 py-1.5 rounded hover:bg-blue-700">▶ 測試執行</button></div>
+      </div>
+      <div class="flex items-center justify-center gap-3 flex-wrap py-6" id="pipeline">
+        <div class="pipeline-node done"><div class="text-xl mb-1">🌐</div>資料擷取<div class="text-[10px] text-green-400 mt-1">完成</div></div>
+        <span class="text-slate-600 text-lg">→</span>
+        <div class="pipeline-node done"><div class="text-xl mb-1">🧹</div>資料清洗<div class="text-[10px] text-green-400 mt-1">完成</div></div>
+        <span class="text-slate-600 text-lg">→</span>
+        <div class="pipeline-node running" id="aiStep"><div class="text-xl mb-1">🧠</div>AI 分析<div class="text-[10px] text-blue-400 mt-1">執行中</div></div>
+        <span class="text-slate-600 text-lg">→</span>
+        <div class="pipeline-node"><div class="text-xl mb-1">📊</div>報表產生<div class="text-[10px] text-slate-500 mt-1">等待</div></div>
+        <span class="text-slate-600 text-lg">→</span>
+        <div class="pipeline-node"><div class="text-xl mb-1">📤</div>結果推送<div class="text-[10px] text-slate-500 mt-1">等待</div></div>
+      </div>
+      <div class="flex justify-center gap-2 mt-4">
+        <button class="text-xs bg-slate-700 px-3 py-1.5 rounded" onclick="runPipeline()">▶ 執行管線</button>
+        <button class="text-xs bg-slate-700 px-3 py-1.5 rounded">＋ 新增節點</button>
+      </div>
+    </div>
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="card p-4"><h4 class="font-semibold text-sm mb-3">🌐 資料擷取</h4><div class="space-y-2 text-xs"><div class="flex justify-between"><span class="text-slate-400">來源</span><span>FB/IG/GoogleMap</span></div><div class="flex justify-between"><span class="text-slate-400">引擎</span><span>Scrapy + Selenium</span></div><div class="flex justify-between"><span class="text-slate-400">頻率</span><span>每 30 分鐘</span></div></div></div>
+      <div class="card p-4"><h4 class="font-semibold text-sm mb-3">🧠 AI 分析</h4><div class="space-y-2 text-xs"><div class="flex justify-between"><span class="text-slate-400">模型</span><span>GPT-4o mini</span></div><div class="flex justify-between"><span class="text-slate-400">任務</span><span>情緒分析 + 分類</span></div><div class="flex justify-between"><span class="text-slate-400">Prompt</span><span class="text-blue-400 cursor-pointer">檢視 →</span></div></div></div>
+      <div class="card p-4"><h4 class="font-semibold text-sm mb-3">📤 結果推送</h4><div class="space-y-2 text-xs"><div class="flex justify-between"><span class="text-slate-400">負評通知</span><span>LINE 即時推播</span></div><div class="flex justify-between"><span class="text-slate-400">日報</span><span>Email 18:00</span></div><div class="flex justify-between"><span class="text-slate-400">數據儲存</span><span>PostgreSQL</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- ========== AGENTS ========== -->
+  <div id="view-agents" class="view">
+    <div class="flex justify-between mb-4"><h3 class="font-semibold">已連接的 AI 模型</h3><button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">＋ 連接模型</button></div>
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="card p-5"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 bg-green-900 rounded-lg flex items-center justify-center text-lg">🧠</div><div><p class="font-semibold text-sm">GPT-4o</p><p class="text-xs text-slate-400">OpenAI</p></div></div><div class="space-y-2 text-xs text-slate-400"><div class="flex justify-between"><span>本月用量</span><span>2.1M tokens</span></div><div class="flex justify-between"><span>本月費用</span><span class="text-white">$84.00</span></div><div class="flex justify-between"><span>平均延遲</span><span>1.2s</span></div></div><div class="mt-3 pt-3 border-t border-slate-700"><span class="text-xs text-green-400">● 連線正常</span></div></div>
+      <div class="card p-5"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 bg-purple-900 rounded-lg flex items-center justify-center text-lg">🧠</div><div><p class="font-semibold text-sm">Claude Opus 4</p><p class="text-xs text-slate-400">Anthropic</p></div></div><div class="space-y-2 text-xs text-slate-400"><div class="flex justify-between"><span>本月用量</span><span>0.8M tokens</span></div><div class="flex justify-between"><span>本月費用</span><span class="text-white">$56.00</span></div><div class="flex justify-between"><span>平均延遲</span><span>2.1s</span></div></div><div class="mt-3 pt-3 border-t border-slate-700"><span class="text-xs text-green-400">● 連線正常</span></div></div>
+      <div class="card p-5"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center text-lg">🧠</div><div><p class="font-semibold text-sm">Gemini 2.5 Pro</p><p class="text-xs text-slate-400">Google</p></div></div><div class="space-y-2 text-xs text-slate-400"><div class="flex justify-between"><span>本月用量</span><span>0.3M tokens</span></div><div class="flex justify-between"><span>本月費用</span><span class="text-white">$0.00</span></div><div class="flex justify-between"><span>平均延遲</span><span>0.8s</span></div></div><div class="mt-3 pt-3 border-t border-slate-700"><span class="text-xs text-green-400">● 連線正常</span></div></div>
+    </div>
+    <div class="card p-5 mt-4">
+      <h4 class="font-semibold text-sm mb-3">Prompt 模板庫</h4>
+      <div class="grid md:grid-cols-2 gap-3 text-sm">
+        <div class="bg-slate-800 rounded-lg p-3 cursor-pointer hover:bg-slate-700">
+          <p class="font-medium">情緒分析 Prompt</p>
+          <p class="text-xs text-slate-400 mt-1 truncate">分析以下評論的情緒（正面/負面/中性）...</p>
+          <p class="text-[10px] text-slate-500 mt-2">分類 · GPT-4o · 使用中</p>
+        </div>
+        <div class="bg-slate-800 rounded-lg p-3 cursor-pointer hover:bg-slate-700">
+          <p class="font-medium">郵件分類 Prompt</p>
+          <p class="text-xs text-slate-400 mt-1 truncate">將郵件分類為：詢價/客訴/技術支援/其他...</p>
+          <p class="text-[10px] text-slate-500 mt-2">分類 · Claude · 使用中</p>
+        </div>
+        <div class="bg-slate-800 rounded-lg p-3 cursor-pointer hover:bg-slate-700">
+          <p class="font-medium">合約條款萃取 Prompt</p>
+          <p class="text-xs text-slate-400 mt-1 truncate">從合約中擷取：金額/期限/罰則/保密條款...</p>
+          <p class="text-[10px] text-slate-500 mt-2">萃取 · Claude · 草稿</p>
+        </div>
+        <div class="bg-slate-800 rounded-lg p-3 cursor-pointer hover:bg-slate-700 border-dashed border border-slate-600 flex items-center justify-center">
+          <span class="text-slate-500">＋ 新增模板</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== CHAT ========== -->
+  <div id="view-chat" class="view">
+    <div class="max-w-3xl mx-auto">
+      <div class="card p-4 mb-4" style="min-height:400px">
+        <div class="space-y-4">
+          <div class="flex gap-3"><div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-xs flex-shrink-0">AI</div><div class="bg-slate-800 rounded-lg p-3 text-sm max-w-md">您好！我是 AI 自動化助手。我可以幫您：<br>1. 建立自動化工作流<br>2. 分析資料並產生報告<br>3. 回答系統操作問題<br><br>請問需要什麼協助？</div></div>
+          <div class="flex gap-3 justify-end"><div class="bg-blue-600 rounded-lg p-3 text-sm max-w-md">幫我監控 FB 上關於我們品牌的負面評論，並自動通知</div><div class="w-8 h-8 bg-slate-600 rounded-lg flex items-center justify-center text-xs flex-shrink-0">我</div></div>
+          <div class="flex gap-3"><div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-xs flex-shrink-0">AI</div><div class="bg-slate-800 rounded-lg p-3 text-sm max-w-md">好的，我建議建立以下工作流：<br><br><b>觸發</b>：每 30 分鐘爬取 FB 粉專評論<br><b>處理</b>：GPT-4o 情緒分析<br><b>條件</b>：情緒 = 負面<br><b>動作</b>：LINE 推播通知管理員<br><br>要以此建立工作流嗎？ ⚡</div></div>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <input type="text" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-sm" placeholder="輸入您的需求或問題..." value="幫我建立一個自動監控競品價格的工作流">
+        <button class="bg-blue-600 text-white px-6 py-3 rounded-lg text-sm hover:bg-blue-700">發送</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== LOGS ========== -->
+  <div id="view-logs" class="view">
+    <div class="card overflow-hidden">
+      <div class="px-5 py-3 border-b border-slate-700 flex items-center gap-4">
+        <select class="bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-sm"><option>全部工作流</option><option>社群輿情監控</option><option>客服郵件分類</option></select>
+        <select class="bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-sm"><option>今日</option><option>本週</option><option>本月</option></select>
+        <input type="text" placeholder="搜尋..." class="bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-sm w-32">
+      </div>
+      <div class="p-4 font-mono text-xs space-y-1 max-h-[500px] overflow-y-auto">
+        <div class="text-slate-500">[15:30:01] <span class="text-blue-400">[輿情監控]</span> 開始爬取 12 個目標</div>
+        <div class="text-slate-500">[15:30:12] <span class="text-blue-400">[輿情監控]</span> 完成 150 筆評論擷取</div>
+        <div class="text-slate-500">[15:30:15] <span class="text-purple-400">[GPT-4o]</span> 情緒分析完成：正面 89 / 中性 56 / 負面 5</div>
+        <div class="text-amber-400">[15:30:16] <span class="text-amber-300">[通知]</span> ⚠️ 偵測到 5 則負評，已推播 LINE</div>
+        <div class="text-slate-500">[15:15:22] <span class="text-green-400">[郵件分類]</span> 處理 47 封郵件：詢價 23 / 客訴 5 / 技術 12 / 其他 7</div>
+        <div class="text-red-400">[15:00:08] <span class="text-red-300">[競品爬取]</span> ❌ momoshop 反爬阻擋 (HTTP 403)</div>
+        <div class="text-slate-500">[15:00:05] <span class="text-blue-400">[競品爬取]</span> 開始爬取 8 個平台</div>
+        <div class="text-slate-600">...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MARKET ========== -->
+  <div id="view-market" class="view">
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="card p-5 cursor-pointer hover:border-blue-500"><div class="text-2xl mb-2">🛒</div><h3 class="font-semibold">電商訂單自動處理</h3><p class="text-xs text-slate-400 mt-1">Shopee/WooCommerce → ERP → 通知</p><div class="mt-3"><button class="text-xs bg-blue-600 px-3 py-1.5 rounded">安裝模板</button></div></div>
+      <div class="card p-5 cursor-pointer hover:border-blue-500"><div class="text-2xl mb-2">📰</div><h3 class="font-semibold">新聞輿情監控</h3><p class="text-xs text-slate-400 mt-1">關鍵字 → 爬取 → NLP 摘要 → Slack</p><div class="mt-3"><button class="text-xs bg-blue-600 px-3 py-1.5 rounded">安裝模板</button></div></div>
+      <div class="card p-5 cursor-pointer hover:border-blue-500"><div class="text-2xl mb-2">📋</div><h3 class="font-semibold">表單自動建檔</h3><p class="text-xs text-slate-400 mt-1">Google Form → AI 分類 → Notion</p><div class="mt-3"><button class="text-xs bg-blue-600 px-3 py-1.5 rounded">安裝模板</button></div></div>
+      <div class="card p-5 cursor-pointer hover:border-blue-500"><div class="text-2xl mb-2">🏥</div><h3 class="font-semibold">診所語音病歷</h3><p class="text-xs text-slate-400 mt-1">錄音 → Whisper → GPT 摘要</p><div class="mt-3"><button class="text-xs bg-blue-600 px-3 py-1.5 rounded">安裝模板</button></div></div>
+      <div class="card p-5 cursor-pointer hover:border-blue-500"><div class="text-2xl mb-2">📊</div><h3 class="font-semibold">週報自動產生</h3><p class="text-xs text-slate-400 mt-1">GA 數據 → GPT 分析 → Email</p><div class="mt-3"><button class="text-xs bg-blue-600 px-3 py-1.5 rounded">安裝模板</button></div></div>
+      <div class="card p-5 border-dashed border-slate-600 flex items-center justify-center" style="min-height:180px"><div class="text-center text-slate-500"><div class="text-2xl mb-2">➕</div><p>請求客製模板</p></div></div>
+    </div>
+  </div>
+
+  <!-- ========== SETTINGS ========== -->
+  <div id="view-settings" class="view">
+    <div class="max-w-2xl space-y-6">
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm mb-4">🔑 API 金鑰</h3>
+        <div class="space-y-3 text-sm">
+          <div><label class="block text-slate-400 mb-1">OpenAI API Key</label><input type="password" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2" value="sk-••••••••" disabled></div>
+          <div><label class="block text-slate-400 mb-1">Anthropic API Key</label><input type="password" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2" value="sk-ant-••••••••" disabled></div>
+          <div><label class="block text-slate-400 mb-1">LINE Messaging API</label><input type="password" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2" value="••••••••" disabled></div>
+        </div>
+      </div>
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm mb-4">📅 全域排程</h3>
+        <label class="flex items-center gap-3 text-sm py-1"><input type="checkbox" checked> 社群監控 — 每 30 分鐘</label>
+        <label class="flex items-center gap-3 text-sm py-1"><input type="checkbox" checked> 郵件分類 — Webhook 觸發</label>
+        <label class="flex items-center gap-3 text-sm py-1"><input type="checkbox" checked> 競品爬取 — 每小時</label>
+        <label class="flex items-center gap-3 text-sm py-1"><input type="checkbox" checked> 週報產生 — 週一 08:00</label>
+      </div>
+    </div>
+  </div>
+
+</main>
 
 <script>
-// ─── Tab switching ───
-function switchTab(name) {
-  document.querySelectorAll('.view').forEach(v => { v.style.display = 'none'; v.classList.remove('active'); });
-  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
-  const viewEl = document.getElementById('view-'+name);
-  if (viewEl) { viewEl.style.display = 'block'; viewEl.classList.add('active'); }
-  const tabEl = document.querySelector(`[data-view="${name}"]`);
-  if (tabEl) tabEl.classList.add('active');
-}
-
-document.querySelectorAll('.view-tab').forEach(tab => {
-  tab.addEventListener('click', e => { e.preventDefault(); switchTab(tab.dataset.view); });
+// ─── View switching ───
+document.querySelectorAll('.nav-item').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    a.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const view = document.getElementById('view-' + a.dataset.view);
+    if (view) view.classList.add('active');
+    document.getElementById('pageTitle').textContent = a.textContent.trim();
+  });
 });
 
-// ─── Pipeline run animation ───
+// ─── Pipeline animation ───
 function runPipeline() {
   const nodes = document.querySelectorAll('#pipeline .pipeline-node');
-  let i = 2; // start from AI node (index 2)
-  nodes.forEach(n => n.classList.remove('step-running','step-done'));
-  nodes[0].classList.add('step-done');
-  nodes[1].classList.add('step-done');
-
-  function step() {
-    if (i >= nodes.length) return;
-    nodes[i].classList.add('step-running');
-    nodes[i].querySelector('div:last-child').textContent = '執行中...';
+  for (let i = 2; i < nodes.length; i++) {
     setTimeout(() => {
-      nodes[i].classList.remove('step-running');
-      nodes[i].classList.add('step-done');
+      nodes[i].classList.add('running');
+      nodes[i].querySelector('div:last-child').textContent = '執行中...';
+      nodes[i].querySelector('div:last-child').className = 'text-[10px] text-blue-400 mt-1';
+    }, (i-2) * 1000);
+    setTimeout(() => {
+      nodes[i].classList.remove('running');
+      nodes[i].classList.add('done');
       nodes[i].querySelector('div:last-child').textContent = '完成';
-      i++;
-      step();
-    }, 1200);
+      nodes[i].querySelector('div:last-child').className = 'text-[10px] text-green-400 mt-1';
+    }, (i-2) * 1000 + 800);
   }
-  step();
 }
 
-// ─── Modal ───
-function showCreateWorkflow() {
-  document.getElementById('create-modal').style.display = 'flex';
-}
-
-// ─── Init ───
-switchTab('workflows');
+setInterval(() => {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-TW');
+}, 1000);
 </script>
 </body>
 </html>

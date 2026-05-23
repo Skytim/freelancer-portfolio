@@ -3,242 +3,286 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>資料爬取與提取工具 — Prototype Demo</title>
+<title>資料爬取與提取平台 — Prototype</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
 body { font-family: 'Noto Sans TC', sans-serif; background: #f8fafc; }
-.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
-.json-view { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: #1e293b; color: #e2e8f0; border-radius: 8px; padding: 16px; }
-.result-row { transition: all 0.15s; }
-.result-row:hover { background: #f1f5f9; }
-.step-indicator { transition: all 0.3s; }
-.step-active { background: #2563eb; color: #fff; }
-.step-done { background: #16a34a; color: #fff; }
+.card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; }
+.sidebar { width:220px; border-right:1px solid #e2e8f0; min-height:100vh; background:#fff; }
+.nav-item { color:#64748b; transition:all .15s; border-radius:8px; }
+.nav-item:hover,.nav-item.active { background:#f1f5f9; color:#0f172a; }
+.nav-item.active { border-left:3px solid #059669; font-weight:500; }
+.view { display:none; }
+.view.active { display:block; }
+.step { transition:all .3s; }
+.step.active .step-num { background:#059669; color:#fff; }
+.step.done .step-num { background:#16a34a; color:#fff; }
+.step-num { width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #e2e8f0;color:#94a3b8; }
+.json-out { font-family:'SF Mono','Fira Code',monospace; font-size:11px; background:#1e293b; color:#e2e8f0; border-radius:8px; padding:16px; max-height:300px; overflow-y:auto; white-space:pre-wrap; }
+.row-hover:hover { background:#f8fafc; }
 </style>
 </head>
-<body>
+<body class="flex">
 
-<!-- Top Bar -->
-<header class="bg-white border-b px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-  <div class="flex items-center gap-3">
-    <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white text-sm">🕷</div>
-    <div>
-      <h1 class="font-bold text-gray-900">資料爬取與提取工具</h1>
-      <p class="text-xs text-gray-400">Web Scraping · Data Extraction · Export</p>
-    </div>
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar flex-shrink-0 hidden md:block">
+  <div class="px-5 py-6 border-b">
+    <h1 class="font-bold text-lg text-gray-900 flex items-center gap-2">🕷 資料爬取平台</h1>
+    <p class="text-xs text-gray-400 mt-1">Web Scraping & Extraction</p>
   </div>
-  <div class="flex gap-2">
-    <button class="text-xs px-3 py-1.5 rounded border border-gray-200 text-gray-500 hover:border-gray-400" onclick="switchView('scraper')">爬取工具</button>
-    <button class="text-xs px-3 py-1.5 rounded border border-gray-200 text-gray-500 hover:border-gray-400" onclick="switchView('results')">歷史結果</button>
-    <button class="text-xs px-3 py-1.5 rounded border border-gray-200 text-gray-500 hover:border-gray-400" onclick="switchView('config')">設定</button>
+  <nav class="p-3 space-y-1 text-sm">
+    <a href="#" class="nav-item active flex items-center gap-3 px-3 py-2.5" data-view="dashboard">📊 儀表板</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="new-job">🆕 新增擷取任務</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="jobs">📋 任務管理</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="templates">📁 網站模板</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="data-view">📊 資料檢視</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="exports">📥 匯出中心</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="schedules">⏰ 排程管理</a>
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5" data-view="settings">⚙️ 系統設定</a>
+  </nav>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<main class="flex-1 p-6">
+
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-lg font-bold text-gray-900" id="pageTitle">📊 儀表板</h2>
+    <div class="text-xs text-gray-400"><span id="clock">--</span></div>
   </div>
-</header>
 
-<div class="max-w-6xl mx-auto px-6 py-6">
-
-  <!-- ============ VIEW: Scraper Tool ============ -->
-  <div id="view-scraper" class="view active">
-
-    <!-- Steps -->
-    <div class="flex items-center gap-2 mb-6 text-sm">
-      <div class="step-indicator step-active w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs" id="step1">1</div>
-      <span class="text-gray-300">→</span>
-      <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gray-200 text-gray-500" id="step2">2</div>
-      <span class="text-gray-300">→</span>
-      <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gray-200 text-gray-500" id="step3">3</div>
-      <span class="text-gray-400 ml-2">URL 設定 → 規則配置 → 執行&匯出</span>
+  <!-- ========== DASHBOARD ========== -->
+  <div id="view-dashboard" class="view active">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="card p-5"><p class="text-xs text-gray-400 mb-1">本月擷取筆數</p><p class="text-2xl font-bold text-gray-900">284,710</p><p class="text-xs text-green-500 mt-1">↑ 18%</p></div>
+      <div class="card p-5"><p class="text-xs text-gray-400 mb-1">活躍任務</p><p class="text-2xl font-bold text-gray-900">12 <span class="text-sm font-normal text-gray-400">/ 15</span></p><p class="text-xs text-amber-500 mt-1">⚠ 3 個待修復</p></div>
+      <div class="card p-5"><p class="text-xs text-gray-400 mb-1">成功率高</p><p class="text-2xl font-bold text-gray-900">97.8%</p><p class="text-xs text-green-500 mt-1">↑ 1.2%</p></div>
+      <div class="card p-5"><p class="text-xs text-gray-400 mb-1">代理 IP 池</p><p class="text-2xl font-bold text-gray-900">2,340</p><p class="text-xs text-gray-400 mt-1">可用 IP</p></div>
     </div>
-
     <div class="grid md:grid-cols-2 gap-6">
-
-      <!-- Left: Configuration -->
-      <div class="space-y-4">
-
-        <!-- URL Input -->
-        <div class="card p-5">
-          <h3 class="font-semibold text-sm mb-3">🌐 目標網址</h3>
-          <input type="text" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="https://example.com/products" value="https://shopee.tw/search?keyword=筆電" id="targetUrl">
-          <div class="flex gap-2 mt-3">
-            <button class="text-xs bg-gray-100 px-3 py-1.5 rounded hover:bg-gray-200" onclick="document.getElementById('targetUrl').value='https://www.104.com.tw/jobs/search/?keyword=Python'">104 求職</button>
-            <button class="text-xs bg-gray-100 px-3 py-1.5 rounded hover:bg-gray-200" onclick="document.getElementById('targetUrl').value='https://shopee.tw/search?keyword=機械鍵盤'">蝦皮商品</button>
-            <button class="text-xs bg-gray-100 px-3 py-1.5 rounded hover:bg-gray-200" onclick="document.getElementById('targetUrl').value='https://www.ptt.cc/bbs/Soft_Job/index.html'">PTT 討論</button>
-          </div>
-        </div>
-
-        <!-- Extraction Rules -->
-        <div class="card p-5">
-          <h3 class="font-semibold text-sm mb-3">🎯 擷取規則</h3>
-          <div class="space-y-3">
-            <div class="grid grid-cols-3 gap-2 text-xs">
-              <div><label class="block text-gray-500 mb-1">欄位名稱</label><input class="w-full border border-gray-200 rounded px-2 py-1.5" value="商品名稱" id="field1name"></div>
-              <div><label class="block text-gray-500 mb-1">CSS Selector</label><input class="w-full border border-gray-200 rounded px-2 py-1.5" value=".item-title" id="field1css"></div>
-              <div><label class="block text-gray-500 mb-1">類型</label><select class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white"><option>文字</option><option>數字</option><option>連結</option><option>圖片URL</option></select></div>
-            </div>
-            <div class="grid grid-cols-3 gap-2 text-xs">
-              <div><input class="w-full border border-gray-200 rounded px-2 py-1.5" value="價格" id="field2name"></div>
-              <div><input class="w-full border border-gray-200 rounded px-2 py-1.5" value=".item-price" id="field2css"></div>
-              <div><select class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white"><option>數字</option><option>文字</option><option>連結</option><option>圖片URL</option></select></div>
-            </div>
-            <div class="grid grid-cols-3 gap-2 text-xs">
-              <div><input class="w-full border border-gray-200 rounded px-2 py-1.5" value="賣場" id="field3name"></div>
-              <div><input class="w-full border border-gray-200 rounded px-2 py-1.5" value=".shop-name" id="field3css"></div>
-              <div><select class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white"><option>文字</option><option>數字</option><option>連結</option><option>圖片URL</option></select></div>
-            </div>
-          </div>
-          <button class="text-xs text-blue-500 mt-3 hover:underline">＋ 新增欄位</button>
-        </div>
-
-        <!-- Options -->
-        <div class="card p-5">
-          <h3 class="font-semibold text-sm mb-3">⚙️ 擷取選項</h3>
-          <div class="space-y-2 text-sm">
-            <label class="flex items-center gap-2"><input type="checkbox" checked> 自動翻頁（最多 <input class="w-12 border border-gray-200 rounded px-1 text-center text-xs" value="10"> 頁）</label>
-            <label class="flex items-center gap-2"><input type="checkbox"> 使用代理 IP 輪換</label>
-            <label class="flex items-center gap-2"><input type="checkbox" checked> 自動去重</label>
-            <label class="flex items-center gap-2"><input type="checkbox"> JavaScript 渲染（SPA 網站）</label>
-            <label class="flex items-center gap-2"><input type="checkbox" checked> 匯出 CSV / JSON / Excel</label>
-          </div>
-        </div>
-
-        <button class="w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 shadow-sm" onclick="runScraper()">
-          🚀 開始擷取
-        </button>
-
+      <div class="card overflow-hidden">
+        <div class="px-5 py-3 border-b font-semibold text-sm">最近執行紀錄</div>
+        <table class="w-full text-sm"><tbody class="divide-y divide-gray-50">
+          <tr class="row-hover"><td class="py-2 px-4"><span class="text-xs bg-green-50 text-green-600 px-1.5 py-0.5 rounded">✓</span></td><td class="py-2 px-4">蝦皮筆電搜尋</td><td class="py-2 px-4 text-right text-gray-400">1,247 筆</td><td class="py-2 px-4 text-right text-gray-400 text-xs">15:30</td></tr>
+          <tr class="row-hover"><td class="py-2 px-4"><span class="text-xs bg-green-50 text-green-600 px-1.5 py-0.5 rounded">✓</span></td><td class="py-2 px-4">104 Python 職缺</td><td class="py-2 px-4 text-right text-gray-400">892 筆</td><td class="py-2 px-4 text-right text-gray-400 text-xs">09:15</td></tr>
+          <tr class="row-hover"><td class="py-2 px-4"><span class="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">⚠</span></td><td class="py-2 px-4">momo 藍牙耳機</td><td class="py-2 px-4 text-right text-red-400">失敗</td><td class="py-2 px-4 text-right text-gray-400 text-xs">08:00</td></tr>
+          <tr class="row-hover"><td class="py-2 px-4"><span class="text-xs bg-green-50 text-green-600 px-1.5 py-0.5 rounded">✓</span></td><td class="py-2 px-4">PTT Soft_Job 新文章</td><td class="py-2 px-4 text-right text-gray-400">156 筆</td><td class="py-2 px-4 text-right text-gray-400 text-xs">昨天 18:00</td></tr>
+        </tbody></table>
       </div>
-
-      <!-- Right: Preview / Results -->
-      <div>
-        <div class="card p-5 mb-4">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="font-semibold text-sm">📊 擷取結果預覽</h3>
-            <span class="text-xs text-gray-400" id="resultCount">準備中</span>
-          </div>
-
-          <!-- Table Results -->
-          <div class="overflow-x-auto" id="resultsTable">
-            <div class="text-center py-12 text-gray-400 text-sm">
-              <div class="text-4xl mb-3">🕷</div>
-              <p>設定目標網址與擷取規則後</p>
-              <p>點擊「開始擷取」查看結果</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- JSON Raw Output -->
-        <div class="card p-5">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="font-semibold text-sm">{ } JSON 原始輸出</h3>
-            <button class="text-xs text-blue-500" onclick="exportData('json')">📥 下載 JSON</button>
-          </div>
-          <pre class="json-view text-xs" id="jsonOutput" style="max-height:300px;overflow-y:auto;">
-// 等待擷取...
-          </pre>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ VIEW: History ============ -->
-  <div id="view-results" class="view" style="display:none">
-    <div class="card overflow-hidden">
-      <div class="px-5 py-4 border-b flex items-center justify-between">
-        <h3 class="font-semibold">📋 歷史擷取紀錄</h3>
-        <input type="text" placeholder="搜尋..." class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-40">
-      </div>
-      <table class="w-full text-sm">
-        <thead class="bg-gray-50 text-gray-500 text-xs">
-          <tr><th class="text-left py-3 px-4">時間</th><th class="text-left py-3 px-4">目標</th><th class="text-right py-3 px-4">筆數</th><th class="text-center py-3 px-4">狀態</th><th class="text-center py-3 px-4">匯出</th></tr>
-        </thead>
-        <tbody class="divide-y divide-gray-50">
-          <tr class="result-row"><td class="py-3 px-4 text-gray-400">05/24 15:30</td><td class="py-3 px-4">shopee.tw - 機械鍵盤</td><td class="py-3 px-4 text-right">1,247</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">完成</span></td><td class="py-3 px-4 text-center"><button class="text-xs text-blue-500" onclick="exportData('csv')">CSV</button> <button class="text-xs text-blue-500" onclick="exportData('json')">JSON</button></td></tr>
-          <tr class="result-row"><td class="py-3 px-4 text-gray-400">05/24 09:15</td><td class="py-3 px-4">104.com.tw - Python 職缺</td><td class="py-3 px-4 text-right">892</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">完成</span></td><td class="py-3 px-4 text-center"><button class="text-xs text-blue-500" onclick="exportData('csv')">CSV</button></td></tr>
-          <tr class="result-row"><td class="py-3 px-4 text-gray-400">05/23 18:00</td><td class="py-3 px-4">ptt.cc - Soft_Job 版</td><td class="py-3 px-4 text-right">156</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">完成</span></td><td class="py-3 px-4 text-center"><button class="text-xs text-blue-500" onclick="exportData('json')">JSON</button></td></tr>
-          <tr class="result-row"><td class="py-3 px-4 text-gray-400">05/23 08:00</td><td class="py-3 px-4">momoshop.com.tw - 藍牙耳機</td><td class="py-3 px-4 text-right text-red-500">失敗</td><td class="py-3 px-4 text-center"><span class="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded">反爬阻擋</span></td><td class="py-3 px-4 text-center"><span class="text-xs text-gray-400">—</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ============ VIEW: Config ============ -->
-  <div id="view-config" class="view" style="display:none">
-    <div class="grid md:grid-cols-2 gap-6">
       <div class="card p-5">
-        <h3 class="font-semibold text-sm mb-4">🔑 API 金鑰設定</h3>
+        <h3 class="font-semibold text-sm mb-4">目標網站狀態</h3>
         <div class="space-y-3 text-sm">
-          <div><label class="block text-gray-500 mb-1">OpenAI API Key</label><input type="password" class="w-full border border-gray-200 rounded px-3 py-2" value="sk-••••••••" disabled></div>
-          <div><label class="block text-gray-500 mb-1">Proxy 列表 URL</label><input class="w-full border border-gray-200 rounded px-3 py-2" value="https://proxy-provider.com/list"></div>
-        </div>
-      </div>
-      <div class="card p-5">
-        <h3 class="font-semibold text-sm mb-4">📅 排程設定</h3>
-        <div class="space-y-2 text-sm">
-          <label class="flex items-center gap-2"><input type="checkbox" checked> 蝦皮競品監控 — 每小時</label>
-          <label class="flex items-center gap-2"><input type="checkbox" checked> 104 職缺更新 — 每日 08:00</label>
-          <label class="flex items-center gap-2"><input type="checkbox"> PTT 關鍵字追蹤 — 每 15 分鐘</label>
+          <div class="flex justify-between"><span>shopee.tw</span><span class="text-green-500">● 正常</span></div>
+          <div class="flex justify-between"><span>104.com.tw</span><span class="text-green-500">● 正常</span></div>
+          <div class="flex justify-between"><span>ptt.cc</span><span class="text-green-500">● 正常</span></div>
+          <div class="flex justify-between"><span>momoshop.com.tw</span><span class="text-red-500">● 反爬阻擋</span></div>
+          <div class="flex justify-between"><span>pchome.com.tw</span><span class="text-amber-500">● 限速中</span></div>
         </div>
       </div>
     </div>
   </div>
 
-</div>
+  <!-- ========== NEW JOB (Wizard) ========== -->
+  <div id="view-new-job" class="view">
+    <div class="max-w-3xl mx-auto">
+      <!-- Steps -->
+      <div class="flex items-center gap-3 mb-8">
+        <div class="step active flex items-center gap-2"><div class="step-num">1</div><span class="text-sm">目標設定</span></div><span class="text-gray-300">→</span>
+        <div class="step flex items-center gap-2"><div class="step-num">2</div><span class="text-sm text-gray-400">規則配置</span></div><span class="text-gray-300">→</span>
+        <div class="step flex items-center gap-2"><div class="step-num">3</div><span class="text-sm text-gray-400">測試執行</span></div><span class="text-gray-300">→</span>
+        <div class="step flex items-center gap-2"><div class="step-num">4</div><span class="text-sm text-gray-400">排程與匯出</span></div>
+      </div>
+
+      <div class="card p-6 mb-4">
+        <h3 class="font-semibold mb-4">🌐 Step 1：目標網址</h3>
+        <div class="space-y-4">
+          <div><label class="block text-sm font-medium mb-1">目標 URL</label><input type="text" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="https://example.com/search?q=..." value="https://shopee.tw/search?keyword=筆電" id="targetUrl"></div>
+          <div class="grid grid-cols-2 gap-4">
+            <div><label class="block text-sm font-medium mb-1">爬取模式</label><select class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"><option>列表頁 + 詳細頁</option><option>僅列表頁</option><option>API 端點</option></select></div>
+            <div><label class="block text-sm font-medium mb-1">翻頁設定</label><select class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"><option>自動翻頁（最多 10 頁）</option><option>僅第一頁</option><option>自訂頁數範圍</option></select></div>
+          </div>
+          <div><label class="block text-sm font-medium mb-1">渲染模式</label><div class="flex gap-4 text-sm"><label class="flex items-center gap-2"><input type="radio" name="render" checked> 標準 HTTP（快速）</label><label class="flex items-center gap-2"><input type="radio" name="render"> JavaScript 渲染（SPA）</label></div></div>
+          <div class="flex gap-2"><span class="text-xs text-gray-400">快速填入：</span><button class="text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200" onclick="document.getElementById('targetUrl').value='https://shopee.tw/search?keyword=機械鍵盤'">蝦皮商品</button><button class="text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200" onclick="document.getElementById('targetUrl').value='https://www.104.com.tw/jobs/search/?keyword=Python'">104 求職</button><button class="text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200" onclick="document.getElementById('targetUrl').value='https://www.ptt.cc/bbs/Soft_Job/index.html'">PTT 討論</button></div>
+        </div>
+      </div>
+
+      <div class="card p-6 mb-4">
+        <h3 class="font-semibold mb-4">🎯 Step 2：擷取欄位規則</h3>
+        <div class="space-y-2 mb-4" id="fieldRules">
+          <div class="grid grid-cols-12 gap-2 text-xs items-end bg-gray-50 p-3 rounded-lg">
+            <div class="col-span-3"><label class="block text-gray-500 mb-1">欄位名稱</label><input class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white" value="商品名稱"></div>
+            <div class="col-span-4"><label class="block text-gray-500 mb-1">CSS / XPath 選擇器</label><input class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white" value=".shopee-search-item-result__items .Cve6sh"></div>
+            <div class="col-span-2"><label class="block text-gray-500 mb-1">類型</label><select class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white"><option>文字</option><option>數字</option><option>URL</option><option>圖片</option></select></div>
+            <div class="col-span-2"><label class="block text-gray-500 mb-1">必填</label><select class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white"><option>是</option><option>否</option></select></div>
+            <div class="col-span-1"><button class="text-red-400 hover:text-red-600">✕</button></div>
+          </div>
+          <div class="grid grid-cols-12 gap-2 text-xs items-end bg-gray-50 p-3 rounded-lg">
+            <div class="col-span-3"><input class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white" value="價格"></div>
+            <div class="col-span-4"><input class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white" value=".ZEgDH9"></div>
+            <div class="col-span-2"><select class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white"><option>數字</option><option>文字</option></select></div>
+            <div class="col-span-2"><select class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white"><option>是</option><option>否</option></select></div>
+            <div class="col-span-1"><button class="text-red-400 hover:text-red-600">✕</button></div>
+          </div>
+          <div class="grid grid-cols-12 gap-2 text-xs items-end bg-gray-50 p-3 rounded-lg">
+            <div class="col-span-3"><input class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white" value="賣場名稱"></div>
+            <div class="col-span-4"><input class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white" value=".X6cV3z"></div>
+            <div class="col-span-2"><select class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white"><option>文字</option></select></div>
+            <div class="col-span-2"><select class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white"><option>是</option></select></div>
+            <div class="col-span-1"><button class="text-red-400">✕</button></div>
+          </div>
+        </div>
+        <button class="text-xs text-emerald-600 hover:underline">＋ 新增欄位</button>
+        <div class="mt-4 flex gap-4 text-sm"><label class="flex items-center gap-2"><input type="checkbox" checked> 自動去重</label><label class="flex items-center gap-2"><input type="checkbox" checked> 自動清理 HTML 標籤</label><label class="flex items-center gap-2"><input type="checkbox"> 使用代理 IP</label></div>
+      </div>
+
+      <div class="flex gap-3">
+        <button class="flex-1 bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 shadow-sm" onclick="runScrape()">🚀 測試擷取（前 20 筆）</button>
+        <button class="flex-1 border border-gray-200 py-3 rounded-lg font-medium text-gray-500 hover:bg-gray-50">💾 儲存草稿</button>
+      </div>
+
+      <div id="scrapePreview" style="display:none" class="mt-6">
+        <div class="card overflow-hidden">
+          <div class="px-5 py-3 border-b flex justify-between items-center"><h3 class="font-semibold text-sm">預覽結果 <span class="text-xs text-gray-400" id="previewCount"></span></h3><span class="text-xs text-green-500">✓ 擷取成功</span></div>
+          <div class="overflow-x-auto" id="previewTable"></div>
+        </div>
+        <div class="card p-4 mt-3"><h4 class="font-semibold text-sm mb-2">JSON 原始輸出</h4><pre class="json-out" id="previewJson">等待擷取...</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== JOBS ========== -->
+  <div id="view-jobs" class="view">
+    <div class="card overflow-hidden">
+      <div class="px-5 py-3 border-b flex justify-between"><h3 class="font-semibold text-sm">所有任務</h3><input type="text" placeholder="搜尋任務..." class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-40"></div>
+      <table class="w-full text-sm"><thead class="bg-gray-50 text-gray-500 text-xs"><tr><th class="text-left py-3 px-4">名稱</th><th class="text-left py-3 px-4">目標</th><th class="text-right py-3 px-4">頻率</th><th class="text-right py-3 px-4">上次</th><th class="text-center py-3 px-4">狀態</th><th class="text-center py-3 px-4">操作</th></tr></thead>
+      <tbody class="divide-y divide-gray-50">
+        <tr class="row-hover"><td class="py-3 px-4 font-medium">蝦皮筆電價格監控</td><td class="py-3 px-4 text-gray-400 text-xs">shopee.tw</td><td class="py-3 px-4 text-right text-gray-400">每小時</td><td class="py-3 px-4 text-right text-gray-400">15:30</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">啟用</span></td><td class="py-3 px-4 text-center"><button class="text-xs text-blue-500 mr-2">編輯</button><button class="text-xs text-amber-500 mr-2">立即執行</button><button class="text-xs text-red-400">停用</button></td></tr>
+        <tr class="row-hover"><td class="py-3 px-4 font-medium">104 Python 職缺</td><td class="py-3 px-4 text-gray-400 text-xs">104.com.tw</td><td class="py-3 px-4 text-right text-gray-400">每日</td><td class="py-3 px-4 text-right text-gray-400">09:15</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">啟用</span></td><td class="py-3 px-4 text-center"><button class="text-xs text-blue-500 mr-2">編輯</button><button class="text-xs text-amber-500 mr-2">立即執行</button><button class="text-xs text-red-400">停用</button></td></tr>
+        <tr class="row-hover"><td class="py-3 px-4 font-medium">momo 藍牙耳機</td><td class="py-3 px-4 text-gray-400 text-xs">momoshop</td><td class="py-3 px-4 text-right text-gray-400">每日</td><td class="py-3 px-4 text-right text-red-400">失敗</td><td class="py-3 px-4 text-center"><span class="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded">錯誤</span></td><td class="py-3 px-4 text-center"><button class="text-xs text-blue-500 mr-2">修復</button><button class="text-xs text-gray-400">刪除</button></td></tr>
+        <tr class="row-hover"><td class="py-3 px-4 font-medium">PTT 軟工版關鍵字</td><td class="py-3 px-4 text-gray-400 text-xs">ptt.cc</td><td class="py-3 px-4 text-right text-gray-400">每 15 分</td><td class="py-3 px-4 text-right text-gray-400">18:00</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">啟用</span></td><td class="py-3 px-4 text-center"><button class="text-xs text-blue-500 mr-2">編輯</button><button class="text-xs text-gray-400">停用</button></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <!-- ========== TEMPLATES ========== -->
+  <div id="view-templates" class="view">
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="card p-5 cursor-pointer hover:border-emerald-400 transition-colors"><div class="text-2xl mb-2">🛒</div><h3 class="font-semibold">蝦皮商品搜尋</h3><p class="text-xs text-gray-400 mt-1">商品名/價格/賣場/評價</p><div class="flex gap-1 mt-3"><span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded">列表頁</span><span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded">自動翻頁</span></div></div>
+      <div class="card p-5 cursor-pointer hover:border-emerald-400 transition-colors"><div class="text-2xl mb-2">💼</div><h3 class="font-semibold">104 人力銀行</h3><p class="text-xs text-gray-400 mt-1">職缺/公司/薪資/技能</p><div class="flex gap-1 mt-3"><span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded">列表頁</span></div></div>
+      <div class="card p-5 cursor-pointer hover:border-emerald-400 transition-colors"><div class="text-2xl mb-2">📰</div><h3 class="font-semibold">PTT 論壇</h3><p class="text-xs text-gray-400 mt-1">標題/作者/時間/推文數</p><div class="flex gap-1 mt-3"><span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded">列表頁</span><span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded">關鍵字過濾</span></div></div>
+      <div class="card p-5 cursor-pointer hover:border-emerald-400 transition-colors"><div class="text-2xl mb-2">🏨</div><h3 class="font-semibold">Google Maps 商家</h3><p class="text-xs text-gray-400 mt-1">店名/評分/評論/地址</p></div>
+      <div class="card p-5 cursor-pointer hover:border-emerald-400 transition-colors"><div class="text-2xl mb-2">📊</div><h3 class="font-semibold">公開資料爬取</h3><p class="text-xs text-gray-400 mt-1">政府開放資料/氣象/股市</p></div>
+      <div class="card p-5 border-dashed border-gray-300 flex items-center justify-center" style="min-height:160px"><div class="text-center text-gray-400"><div class="text-2xl mb-2">➕</div><p class="text-sm">新增自訂模板</p></div></div>
+    </div>
+  </div>
+
+  <!-- ========== DATA VIEW ========== -->
+  <div id="view-data-view" class="view">
+    <div class="card overflow-hidden">
+      <div class="px-5 py-3 border-b flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <h3 class="font-semibold text-sm">擷取資料庫</h3>
+          <select class="border border-gray-200 rounded px-2 py-1 text-xs"><option>蝦皮筆電監控</option><option>104 職缺</option></select>
+        </div>
+        <div class="flex gap-2">
+          <input type="text" placeholder="搜尋..." class="border border-gray-200 rounded-lg px-3 py-1.5 text-xs w-36">
+          <button class="text-xs bg-gray-100 px-3 py-1.5 rounded hover:bg-gray-200">篩選</button>
+        </div>
+      </div>
+      <table class="w-full text-sm"><thead class="bg-gray-50 text-gray-500 text-xs"><tr><th class="text-left py-3 px-4">#</th><th class="text-left py-3 px-4">商品名稱</th><th class="text-right py-3 px-4">價格</th><th class="text-left py-3 px-4">賣場</th><th class="text-right py-3 px-4">已售</th><th class="text-left py-3 px-4">擷取時間</th></tr></thead>
+      <tbody class="divide-y divide-gray-50" id="dataTable">
+        <tr class="row-hover"><td class="py-2 px-4 text-gray-400 text-xs">1</td><td class="py-2 px-4 font-medium">ASUS ROG Zephyrus G16</td><td class="py-2 px-4 text-right">$42,900</td><td class="py-2 px-4 text-gray-400 text-xs">ASUS 官方旗艦</td><td class="py-2 px-4 text-right text-gray-400">1.2萬</td><td class="py-2 px-4 text-gray-400 text-xs">05/24 15:30</td></tr>
+        <tr class="row-hover"><td class="py-2 px-4 text-gray-400 text-xs">2</td><td class="py-2 px-4 font-medium">MSI Katana 15 B13VGK</td><td class="py-2 px-4 text-right">$35,900</td><td class="py-2 px-4 text-gray-400 text-xs">MSI 授權經銷</td><td class="py-2 px-4 text-right text-gray-400">8.5k</td><td class="py-2 px-4 text-gray-400 text-xs">05/24 15:30</td></tr>
+        <tr class="row-hover"><td class="py-2 px-4 text-gray-400 text-xs">3</td><td class="py-2 px-4 font-medium">Lenovo Legion 5 Pro</td><td class="py-2 px-4 text-right">$38,900</td><td class="py-2 px-4 text-gray-400 text-xs">Lenovo 旗艦店</td><td class="py-2 px-4 text-right text-gray-400">6.3k</td><td class="py-2 px-4 text-gray-400 text-xs">05/24 15:30</td></tr>
+        <tr class="row-hover"><td class="py-2 px-4 text-gray-400 text-xs">4</td><td class="py-2 px-4 font-medium">Acer Nitro 5 AN515-58</td><td class="py-2 px-4 text-right">$29,900</td><td class="py-2 px-4 text-gray-400 text-xs">Acer 直營</td><td class="py-2 px-4 text-right text-gray-400">1.8萬</td><td class="py-2 px-4 text-gray-400 text-xs">05/24 15:30</td></tr>
+        <tr class="row-hover"><td class="py-2 px-4 text-gray-400 text-xs">5</td><td class="py-2 px-4 font-medium">HP Victus 16</td><td class="py-2 px-4 text-right">$33,900</td><td class="py-2 px-4 text-gray-400 text-xs">HP 官方商店</td><td class="py-2 px-4 text-right text-gray-400">5.2k</td><td class="py-2 px-4 text-gray-400 text-xs">05/24 15:30</td></tr>
+      </tbody></table>
+      <div class="px-5 py-3 border-t flex justify-between text-xs text-gray-400"><span>顯示 1-5 筆，共 1,247 筆</span><div class="flex gap-1"><button class="px-2 py-1 border rounded">←</button><button class="px-2 py-1 border rounded bg-emerald-50 text-emerald-600">1</button><button class="px-2 py-1 border rounded">2</button><button class="px-2 py-1 border rounded">3</button><button class="px-2 py-1 border rounded">→</button></div></div>
+    </div>
+  </div>
+
+  <!-- ========== EXPORTS ========== -->
+  <div id="view-exports" class="view">
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card p-6">
+        <h3 class="font-semibold mb-4">📥 匯出資料</h3>
+        <div class="space-y-4 text-sm">
+          <div><label class="block mb-1">選擇任務</label><select class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white"><option>蝦皮筆電監控</option><option>104 職缺</option></select></div>
+          <div><label class="block mb-1">匯出格式</label><div class="grid grid-cols-3 gap-2"><button class="border-2 border-emerald-200 rounded-lg py-3 text-sm bg-emerald-50 text-emerald-700 font-medium">CSV</button><button class="border border-gray-200 rounded-lg py-3 text-sm hover:border-gray-300">Excel (XLSX)</button><button class="border border-gray-200 rounded-lg py-3 text-sm hover:border-gray-300">JSON</button></div></div>
+          <div><label class="block mb-1">時間範圍</label><select class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white"><option>最近一次</option><option>今日</option><option>本週</option><option>本月</option><option>全部</option></select></div>
+          <button class="w-full bg-emerald-600 text-white py-2.5 rounded-lg text-sm hover:bg-emerald-700" onclick="alert('📥 匯出完成！\nscraper_export_20260524.csv\n1,247 筆資料')">下載檔案</button>
+        </div>
+      </div>
+      <div class="card p-6">
+        <h3 class="font-semibold mb-4">🔗 API 端點</h3>
+        <div class="space-y-3 text-sm">
+          <div class="bg-gray-50 rounded-lg p-3 font-mono text-xs">GET /api/v1/data/export?job=shopeelaptop&format=csv&range=7d</div>
+          <div class="bg-gray-50 rounded-lg p-3 font-mono text-xs">POST /api/v1/scrape/trigger { "job": "shopeelaptop" }</div>
+          <p class="text-xs text-gray-400">可串接 Google Sheet / Power BI / Tableau</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SCHEDULES ========== -->
+  <div id="view-schedules" class="view">
+    <div class="card overflow-hidden">
+      <div class="px-5 py-3 border-b flex justify-between"><h3 class="font-semibold text-sm">排程管理</h3><button class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs">＋ 新增排程</button></div>
+      <table class="w-full text-sm"><thead class="bg-gray-50 text-gray-500 text-xs"><tr><th class="text-left py-3 px-4">任務</th><th class="text-left py-3 px-4">Cron</th><th class="text-left py-3 px-4">下次執行</th><th class="text-center py-3 px-4">狀態</th></tr></thead>
+      <tbody class="divide-y divide-gray-50">
+        <tr><td class="py-3 px-4">蝦皮筆電監控</td><td class="py-3 px-4 font-mono text-xs">0 * * * *</td><td class="py-3 px-4 text-gray-400">16:00</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">啟用</span></td></tr>
+        <tr><td class="py-3 px-4">104 職缺</td><td class="py-3 px-4 font-mono text-xs">0 8 * * *</td><td class="py-3 px-4 text-gray-400">明天 08:00</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">啟用</span></td></tr>
+        <tr><td class="py-3 px-4">PTT 關鍵字</td><td class="py-3 px-4 font-mono text-xs">*/15 * * * *</td><td class="py-3 px-4 text-gray-400">16:15</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">啟用</span></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <!-- ========== SETTINGS ========== -->
+  <div id="view-settings" class="view">
+    <div class="max-w-2xl space-y-6">
+      <div class="card p-5"><h3 class="font-semibold text-sm mb-3">🔑 代理 IP 設定</h3><div class="space-y-2 text-sm"><div><label class="block text-gray-500 mb-1">Proxy 列表 URL</label><input class="w-full border border-gray-200 rounded px-3 py-2" value="https://proxy-provider.com/api/list"></div><label class="flex items-center gap-2"><input type="checkbox" checked> 自動輪換 IP</label><label class="flex items-center gap-2"><input type="checkbox"> 失敗自動切換</label></div></div>
+      <div class="card p-5"><h3 class="font-semibold text-sm mb-3">📊 資料儲存</h3><div class="space-y-2 text-sm"><label class="flex items-center gap-2"><input type="radio" name="storage" checked> PostgreSQL（推薦）</label><label class="flex items-center gap-2"><input type="radio" name="storage"> MongoDB</label><label class="flex items-center gap-2"><input type="radio" name="storage"> Google Sheets</label></div></div>
+    </div>
+  </div>
+
+</main>
 
 <script>
 // ─── View switching ───
-function switchView(name) {
-  document.querySelectorAll('.view').forEach(v => { v.style.display = 'none'; });
-  const el = document.getElementById('view-'+name);
-  if (el) el.style.display = 'block';
+document.querySelectorAll('.nav-item').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    a.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const view = document.getElementById('view-' + a.dataset.view);
+    if (view) view.classList.add('active');
+    document.getElementById('pageTitle').textContent = a.textContent.trim();
+  });
+});
+
+// ─── Run scrape ───
+function runScrape() {
+  const preview = document.getElementById('scrapePreview');
+  preview.style.display = 'block';
+  const data = [
+    { name:'ASUS ROG Zephyrus G16', price:42900, shop:'ASUS 官方旗艦', sold:'1.2萬' },
+    { name:'MSI Katana 15 B13VGK', price:35900, shop:'MSI 授權經銷', sold:'8.5k' },
+    { name:'Lenovo Legion 5 Pro', price:38900, shop:'Lenovo 旗艦店', sold:'6.3k' },
+    { name:'Acer Nitro 5 AN515-58', price:29900, shop:'Acer 直營', sold:'1.8萬' },
+    { name:'HP Victus 16 電競筆電', price:33900, shop:'HP 官方商店', sold:'5.2k' },
+    { name:'Dell G15 5530', price:36900, shop:'Dell 授權商', sold:'3.1k' },
+    { name:'MacBook Air M3 15"', price:42900, shop:'Apple 旗艦館', sold:'2.8萬' },
+  ];
+  document.getElementById('previewCount').textContent = `共 ${data.length} 筆`;
+  let t = '<table class="w-full text-sm"><thead class="bg-gray-50 text-gray-500 text-xs"><tr><th class="text-left py-2 px-4">#</th><th class="text-left py-2 px-4">商品名稱</th><th class="text-right py-2 px-4">價格</th><th class="text-left py-2 px-4">賣場</th></tr></thead><tbody class="divide-y divide-gray-50">';
+  data.forEach((d,i) => { t += `<tr class="row-hover"><td class="py-2 px-4 text-gray-400 text-xs">${i+1}</td><td class="py-2 px-4 font-medium">${d.name}</td><td class="py-2 px-4 text-right">$${d.price.toLocaleString()}</td><td class="py-2 px-4 text-gray-400 text-xs">${d.shop}</td></tr>`; });
+  t += '</tbody></table>';
+  document.getElementById('previewTable').innerHTML = t;
+  document.getElementById('previewJson').textContent = JSON.stringify(data, null, 2);
 }
 
-// ─── Run scraper (simulated) ───
-function runScraper() {
-  // Update steps
-  document.getElementById('step1').className = 'step-indicator step-done w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs';
-  document.getElementById('step2').className = 'step-indicator step-active w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs';
-
-  // Simulate loading
-  setTimeout(() => {
-    document.getElementById('step2').className = 'step-indicator step-done w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs';
-    document.getElementById('step3').className = 'step-indicator step-active w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs';
-  }, 800);
-
-  // Show results
-  setTimeout(() => {
-    const sampleData = [
-      { name:'ASUS ROG Zephyrus G16', price:42900, shop:'ASUS 官方旗艦', url:'https://shopee.tw/...' },
-      { name:'MSI Katana 15 B13VGK', price:35900, shop:'MSI 授權經銷', url:'https://shopee.tw/...' },
-      { name:'Lenovo Legion 5 Pro', price:38900, shop:'Lenovo 旗艦店', url:'https://shopee.tw/...' },
-      { name:'Acer Nitro 5 AN515-58', price:29900, shop:'Acer 直營', url:'https://shopee.tw/...' },
-      { name:'HP Victus 16 電競筆電', price:33900, shop:'HP 官方商店', url:'https://shopee.tw/...' },
-      { name:'Dell G15 5530 電競', price:36900, shop:'Dell 授權商', url:'https://shopee.tw/...' },
-      { name:'MacBook Air M3 15"', price:42900, shop:'Apple 旗艦館', url:'https://shopee.tw/...' },
-    ];
-
-    document.getElementById('resultCount').textContent = `共 ${sampleData.length} 筆`;
-
-    let tableHTML = '<table class="w-full text-sm"><thead class="bg-gray-50 text-gray-500 text-xs"><tr><th class="text-left py-2 px-3">#</th><th class="text-left py-2 px-3">商品名稱</th><th class="text-right py-2 px-3">價格</th><th class="text-left py-2 px-3">賣場</th></tr></thead><tbody class="divide-y divide-gray-50">';
-    sampleData.forEach((item, i) => {
-      tableHTML += `<tr class="result-row"><td class="py-2 px-3 text-gray-400 text-xs">${i+1}</td><td class="py-2 px-3 font-medium">${item.name}</td><td class="py-2 px-3 text-right">$${item.price.toLocaleString()}</td><td class="py-2 px-3 text-gray-400 text-xs">${item.shop}</td></tr>`;
-    });
-    tableHTML += '</tbody></table>';
-    document.getElementById('resultsTable').innerHTML = tableHTML;
-    document.getElementById('jsonOutput').textContent = JSON.stringify(sampleData, null, 2);
-    document.getElementById('step3').className = 'step-indicator step-done w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs';
-  }, 1600);
-}
-
-// ─── Export ───
-function exportData(format) {
-  if (format === 'csv') {
-    alert('📥 CSV 已下載\n\nscraper_export_20260524.csv\n1,247 筆資料');
-  } else if (format === 'json') {
-    alert('📥 JSON 已下載\n\nscraper_export_20260524.json\n1,247 筆資料');
-  }
-}
-
-console.log('🕷 爬蟲/資料提取工具 prototype');
-console.log('技術棧建議：Python (Scrapy/Playwright) + PostgreSQL + Redis + Celery');
+setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-TW'); }, 1000);
 </script>
 </body>
 </html>
