@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>資料爬取與提取工具 — Prototype Demo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+body { font-family: 'Noto Sans TC', sans-serif; background: #f8fafc; }
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+.json-view { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: #1e293b; color: #e2e8f0; border-radius: 8px; padding: 16px; }
+.result-row { transition: all 0.15s; }
+.result-row:hover { background: #f1f5f9; }
+.step-indicator { transition: all 0.3s; }
+.step-active { background: #2563eb; color: #fff; }
+.step-done { background: #16a34a; color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<header class="bg-white border-b px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white text-sm">🕷</div>
+    <div>
+      <h1 class="font-bold text-gray-900">資料爬取與提取工具</h1>
+      <p class="text-xs text-gray-400">Web Scraping · Data Extraction · Export</p>
+    </div>
+  </div>
+  <div class="flex gap-2">
+    <button class="text-xs px-3 py-1.5 rounded border border-gray-200 text-gray-500 hover:border-gray-400" onclick="switchView('scraper')">爬取工具</button>
+    <button class="text-xs px-3 py-1.5 rounded border border-gray-200 text-gray-500 hover:border-gray-400" onclick="switchView('results')">歷史結果</button>
+    <button class="text-xs px-3 py-1.5 rounded border border-gray-200 text-gray-500 hover:border-gray-400" onclick="switchView('config')">設定</button>
+  </div>
+</header>
+
+<div class="max-w-6xl mx-auto px-6 py-6">
+
+  <!-- ============ VIEW: Scraper Tool ============ -->
+  <div id="view-scraper" class="view active">
+
+    <!-- Steps -->
+    <div class="flex items-center gap-2 mb-6 text-sm">
+      <div class="step-indicator step-active w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs" id="step1">1</div>
+      <span class="text-gray-300">→</span>
+      <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gray-200 text-gray-500" id="step2">2</div>
+      <span class="text-gray-300">→</span>
+      <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gray-200 text-gray-500" id="step3">3</div>
+      <span class="text-gray-400 ml-2">URL 設定 → 規則配置 → 執行&匯出</span>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+
+      <!-- Left: Configuration -->
+      <div class="space-y-4">
+
+        <!-- URL Input -->
+        <div class="card p-5">
+          <h3 class="font-semibold text-sm mb-3">🌐 目標網址</h3>
+          <input type="text" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="https://example.com/products" value="https://shopee.tw/search?keyword=筆電" id="targetUrl">
+          <div class="flex gap-2 mt-3">
+            <button class="text-xs bg-gray-100 px-3 py-1.5 rounded hover:bg-gray-200" onclick="document.getElementById('targetUrl').value='https://www.104.com.tw/jobs/search/?keyword=Python'">104 求職</button>
+            <button class="text-xs bg-gray-100 px-3 py-1.5 rounded hover:bg-gray-200" onclick="document.getElementById('targetUrl').value='https://shopee.tw/search?keyword=機械鍵盤'">蝦皮商品</button>
+            <button class="text-xs bg-gray-100 px-3 py-1.5 rounded hover:bg-gray-200" onclick="document.getElementById('targetUrl').value='https://www.ptt.cc/bbs/Soft_Job/index.html'">PTT 討論</button>
+          </div>
+        </div>
+
+        <!-- Extraction Rules -->
+        <div class="card p-5">
+          <h3 class="font-semibold text-sm mb-3">🎯 擷取規則</h3>
+          <div class="space-y-3">
+            <div class="grid grid-cols-3 gap-2 text-xs">
+              <div><label class="block text-gray-500 mb-1">欄位名稱</label><input class="w-full border border-gray-200 rounded px-2 py-1.5" value="商品名稱" id="field1name"></div>
+              <div><label class="block text-gray-500 mb-1">CSS Selector</label><input class="w-full border border-gray-200 rounded px-2 py-1.5" value=".item-title" id="field1css"></div>
+              <div><label class="block text-gray-500 mb-1">類型</label><select class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white"><option>文字</option><option>數字</option><option>連結</option><option>圖片URL</option></select></div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-xs">
+              <div><input class="w-full border border-gray-200 rounded px-2 py-1.5" value="價格" id="field2name"></div>
+              <div><input class="w-full border border-gray-200 rounded px-2 py-1.5" value=".item-price" id="field2css"></div>
+              <div><select class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white"><option>數字</option><option>文字</option><option>連結</option><option>圖片URL</option></select></div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-xs">
+              <div><input class="w-full border border-gray-200 rounded px-2 py-1.5" value="賣場" id="field3name"></div>
+              <div><input class="w-full border border-gray-200 rounded px-2 py-1.5" value=".shop-name" id="field3css"></div>
+              <div><select class="w-full border border-gray-200 rounded px-2 py-1.5 bg-white"><option>文字</option><option>數字</option><option>連結</option><option>圖片URL</option></select></div>
+            </div>
+          </div>
+          <button class="text-xs text-blue-500 mt-3 hover:underline">＋ 新增欄位</button>
+        </div>
+
+        <!-- Options -->
+        <div class="card p-5">
+          <h3 class="font-semibold text-sm mb-3">⚙️ 擷取選項</h3>
+          <div class="space-y-2 text-sm">
+            <label class="flex items-center gap-2"><input type="checkbox" checked> 自動翻頁（最多 <input class="w-12 border border-gray-200 rounded px-1 text-center text-xs" value="10"> 頁）</label>
+            <label class="flex items-center gap-2"><input type="checkbox"> 使用代理 IP 輪換</label>
+            <label class="flex items-center gap-2"><input type="checkbox" checked> 自動去重</label>
+            <label class="flex items-center gap-2"><input type="checkbox"> JavaScript 渲染（SPA 網站）</label>
+            <label class="flex items-center gap-2"><input type="checkbox" checked> 匯出 CSV / JSON / Excel</label>
+          </div>
+        </div>
+
+        <button class="w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 shadow-sm" onclick="runScraper()">
+          🚀 開始擷取
+        </button>
+
+      </div>
+
+      <!-- Right: Preview / Results -->
+      <div>
+        <div class="card p-5 mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-sm">📊 擷取結果預覽</h3>
+            <span class="text-xs text-gray-400" id="resultCount">準備中</span>
+          </div>
+
+          <!-- Table Results -->
+          <div class="overflow-x-auto" id="resultsTable">
+            <div class="text-center py-12 text-gray-400 text-sm">
+              <div class="text-4xl mb-3">🕷</div>
+              <p>設定目標網址與擷取規則後</p>
+              <p>點擊「開始擷取」查看結果</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- JSON Raw Output -->
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-sm">{ } JSON 原始輸出</h3>
+            <button class="text-xs text-blue-500" onclick="exportData('json')">📥 下載 JSON</button>
+          </div>
+          <pre class="json-view text-xs" id="jsonOutput" style="max-height:300px;overflow-y:auto;">
+// 等待擷取...
+          </pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: History ============ -->
+  <div id="view-results" class="view" style="display:none">
+    <div class="card overflow-hidden">
+      <div class="px-5 py-4 border-b flex items-center justify-between">
+        <h3 class="font-semibold">📋 歷史擷取紀錄</h3>
+        <input type="text" placeholder="搜尋..." class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-40">
+      </div>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-500 text-xs">
+          <tr><th class="text-left py-3 px-4">時間</th><th class="text-left py-3 px-4">目標</th><th class="text-right py-3 px-4">筆數</th><th class="text-center py-3 px-4">狀態</th><th class="text-center py-3 px-4">匯出</th></tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          <tr class="result-row"><td class="py-3 px-4 text-gray-400">05/24 15:30</td><td class="py-3 px-4">shopee.tw - 機械鍵盤</td><td class="py-3 px-4 text-right">1,247</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">完成</span></td><td class="py-3 px-4 text-center"><button class="text-xs text-blue-500" onclick="exportData('csv')">CSV</button> <button class="text-xs text-blue-500" onclick="exportData('json')">JSON</button></td></tr>
+          <tr class="result-row"><td class="py-3 px-4 text-gray-400">05/24 09:15</td><td class="py-3 px-4">104.com.tw - Python 職缺</td><td class="py-3 px-4 text-right">892</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">完成</span></td><td class="py-3 px-4 text-center"><button class="text-xs text-blue-500" onclick="exportData('csv')">CSV</button></td></tr>
+          <tr class="result-row"><td class="py-3 px-4 text-gray-400">05/23 18:00</td><td class="py-3 px-4">ptt.cc - Soft_Job 版</td><td class="py-3 px-4 text-right">156</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">完成</span></td><td class="py-3 px-4 text-center"><button class="text-xs text-blue-500" onclick="exportData('json')">JSON</button></td></tr>
+          <tr class="result-row"><td class="py-3 px-4 text-gray-400">05/23 08:00</td><td class="py-3 px-4">momoshop.com.tw - 藍牙耳機</td><td class="py-3 px-4 text-right text-red-500">失敗</td><td class="py-3 px-4 text-center"><span class="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded">反爬阻擋</span></td><td class="py-3 px-4 text-center"><span class="text-xs text-gray-400">—</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: Config ============ -->
+  <div id="view-config" class="view" style="display:none">
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm mb-4">🔑 API 金鑰設定</h3>
+        <div class="space-y-3 text-sm">
+          <div><label class="block text-gray-500 mb-1">OpenAI API Key</label><input type="password" class="w-full border border-gray-200 rounded px-3 py-2" value="sk-••••••••" disabled></div>
+          <div><label class="block text-gray-500 mb-1">Proxy 列表 URL</label><input class="w-full border border-gray-200 rounded px-3 py-2" value="https://proxy-provider.com/list"></div>
+        </div>
+      </div>
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm mb-4">📅 排程設定</h3>
+        <div class="space-y-2 text-sm">
+          <label class="flex items-center gap-2"><input type="checkbox" checked> 蝦皮競品監控 — 每小時</label>
+          <label class="flex items-center gap-2"><input type="checkbox" checked> 104 職缺更新 — 每日 08:00</label>
+          <label class="flex items-center gap-2"><input type="checkbox"> PTT 關鍵字追蹤 — 每 15 分鐘</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── View switching ───
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v => { v.style.display = 'none'; });
+  const el = document.getElementById('view-'+name);
+  if (el) el.style.display = 'block';
+}
+
+// ─── Run scraper (simulated) ───
+function runScraper() {
+  // Update steps
+  document.getElementById('step1').className = 'step-indicator step-done w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs';
+  document.getElementById('step2').className = 'step-indicator step-active w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs';
+
+  // Simulate loading
+  setTimeout(() => {
+    document.getElementById('step2').className = 'step-indicator step-done w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs';
+    document.getElementById('step3').className = 'step-indicator step-active w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs';
+  }, 800);
+
+  // Show results
+  setTimeout(() => {
+    const sampleData = [
+      { name:'ASUS ROG Zephyrus G16', price:42900, shop:'ASUS 官方旗艦', url:'https://shopee.tw/...' },
+      { name:'MSI Katana 15 B13VGK', price:35900, shop:'MSI 授權經銷', url:'https://shopee.tw/...' },
+      { name:'Lenovo Legion 5 Pro', price:38900, shop:'Lenovo 旗艦店', url:'https://shopee.tw/...' },
+      { name:'Acer Nitro 5 AN515-58', price:29900, shop:'Acer 直營', url:'https://shopee.tw/...' },
+      { name:'HP Victus 16 電競筆電', price:33900, shop:'HP 官方商店', url:'https://shopee.tw/...' },
+      { name:'Dell G15 5530 電競', price:36900, shop:'Dell 授權商', url:'https://shopee.tw/...' },
+      { name:'MacBook Air M3 15"', price:42900, shop:'Apple 旗艦館', url:'https://shopee.tw/...' },
+    ];
+
+    document.getElementById('resultCount').textContent = `共 ${sampleData.length} 筆`;
+
+    let tableHTML = '<table class="w-full text-sm"><thead class="bg-gray-50 text-gray-500 text-xs"><tr><th class="text-left py-2 px-3">#</th><th class="text-left py-2 px-3">商品名稱</th><th class="text-right py-2 px-3">價格</th><th class="text-left py-2 px-3">賣場</th></tr></thead><tbody class="divide-y divide-gray-50">';
+    sampleData.forEach((item, i) => {
+      tableHTML += `<tr class="result-row"><td class="py-2 px-3 text-gray-400 text-xs">${i+1}</td><td class="py-2 px-3 font-medium">${item.name}</td><td class="py-2 px-3 text-right">$${item.price.toLocaleString()}</td><td class="py-2 px-3 text-gray-400 text-xs">${item.shop}</td></tr>`;
+    });
+    tableHTML += '</tbody></table>';
+    document.getElementById('resultsTable').innerHTML = tableHTML;
+    document.getElementById('jsonOutput').textContent = JSON.stringify(sampleData, null, 2);
+    document.getElementById('step3').className = 'step-indicator step-done w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs';
+  }, 1600);
+}
+
+// ─── Export ───
+function exportData(format) {
+  if (format === 'csv') {
+    alert('📥 CSV 已下載\n\nscraper_export_20260524.csv\n1,247 筆資料');
+  } else if (format === 'json') {
+    alert('📥 JSON 已下載\n\nscraper_export_20260524.json\n1,247 筆資料');
+  }
+}
+
+console.log('🕷 爬蟲/資料提取工具 prototype');
+console.log('技術棧建議：Python (Scrapy/Playwright) + PostgreSQL + Redis + Celery');
+</script>
+</body>
+</html>
