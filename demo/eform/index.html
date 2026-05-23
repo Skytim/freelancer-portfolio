@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>機房巡檢電子表單 — Prototype Demo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+  body { font-family: 'Noto Sans TC', sans-serif; background: #f0f2f5; }
+  .tablet-frame { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.08); }
+  .tab-active { border-bottom: 2px solid #2563eb; color: #2563eb; }
+  .field-card { background: #f8fafc; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; }
+  .photo-slot { width: 80px; height: 80px; border: 2px dashed #cbd5e0; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; color: #94a3b8; }
+  .photo-slot:hover { border-color: #2563eb; color: #2563eb; }
+  .status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+  .status-ok { background: #dcfce7; color: #16a34a; }
+  .status-warn { background: #fef9c3; color: #ca8a04; }
+  .status-err { background: #fee2e2; color: #dc2626; }
+  .scan-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="tablet-frame relative">
+
+  <!-- Header -->
+  <header class="bg-slate-800 text-white px-5 py-4 sticky top-0 z-10">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-xs text-slate-400">機房巡檢系統 v1.0</p>
+        <h1 class="font-bold text-lg">📋 設備巡檢表單</h1>
+      </div>
+      <div class="text-right">
+        <p class="text-xs text-slate-400" id="currentTime">--</p>
+        <p class="text-xs text-blue-300 cursor-pointer" onclick="toggleView()">🔧 切換視角</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ ENGINEER VIEW ============ -->
+  <div id="engineerView">
+
+    <!-- QR Scan Bar -->
+    <div class="px-4 py-3 bg-blue-50 border-b border-blue-100 flex items-center gap-3 cursor-pointer" onclick="simulateQRScan()">
+      <div class="bg-blue-600 text-white w-10 h-10 rounded-lg flex items-center justify-center text-lg">📷</div>
+      <div>
+        <p class="text-sm font-medium text-blue-800">掃描設備 QR Code</p>
+        <p class="text-xs text-blue-500">自動帶入設備資料與歷史紀錄</p>
+      </div>
+      <div class="ml-auto text-blue-400 text-sm">▶</div>
+    </div>
+
+    <!-- Equipment Info (after QR scan) -->
+    <div id="equipInfo" class="px-4 py-3 bg-white border-b flex items-center gap-3">
+      <div class="bg-green-100 text-green-700 w-10 h-10 rounded-lg flex items-center justify-center text-lg">🖥️</div>
+      <div class="flex-1">
+        <p class="font-semibold text-sm" id="equipName">UPS-3F-A01</p>
+        <p class="text-xs text-gray-400" id="equipDetail">3F 機房 · APC Smart-UPS 3000</p>
+      </div>
+      <span class="status-ok status-badge">正常</span>
+    </div>
+
+    <!-- Equipment Type Selector -->
+    <div class="px-4 py-3 bg-white border-b">
+      <p class="text-xs text-gray-400 mb-2">巡檢類型</p>
+      <div class="flex gap-2 overflow-x-auto pb-1" id="equipTabs">
+        <button class="tab-active text-xs px-3 py-1.5 rounded-full whitespace-nowrap bg-blue-50" onclick="switchEquip('ups', this)">UPS</button>
+        <button class="text-xs px-3 py-1.5 rounded-full whitespace-nowrap border border-gray-200 text-gray-500" onclick="switchEquip('inrow', this)">InRow 空調</button>
+        <button class="text-xs px-3 py-1.5 rounded-full whitespace-nowrap border border-gray-200 text-gray-500" onclick="switchEquip('fire', this)">消防設備</button>
+        <button class="text-xs px-3 py-1.5 rounded-full whitespace-nowrap border border-gray-200 text-gray-500" onclick="switchEquip('env', this)">環控設備</button>
+        <button class="text-xs px-3 py-1.5 rounded-full whitespace-nowrap border border-gray-200 text-gray-500" onclick="switchEquip('cabinet', this)">機櫃巡檢</button>
+      </div>
+    </div>
+
+    <!-- Dynamic Form Fields -->
+    <div class="px-4 py-4" id="formFields">
+      <!-- Fields rendered by JS -->
+    </div>
+
+    <!-- Photo Upload -->
+    <div class="px-4 py-3 bg-white border-t">
+      <p class="text-sm font-medium mb-2">📸 現場照片</p>
+      <div class="flex gap-3">
+        <div class="photo-slot" onclick="this.innerHTML='✅'" title="點擊模擬拍照">+</div>
+        <div class="photo-slot" onclick="this.innerHTML='✅'">+</div>
+        <div class="photo-slot" onclick="this.innerHTML='✅'">+</div>
+      </div>
+      <p class="text-xs text-gray-400 mt-1">點擊模擬拍照 · 照片綁定設備及工單</p>
+    </div>
+
+    <!-- Notes -->
+    <div class="px-4 py-3 bg-white border-t">
+      <label class="text-sm font-medium block mb-1">📝 備註</label>
+      <textarea class="w-full border border-gray-200 rounded-lg p-3 text-sm resize-none" rows="2" placeholder="異常說明或維修建議..."></textarea>
+    </div>
+
+    <!-- Submit -->
+    <div class="px-4 py-6 flex gap-3">
+      <button class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-lg font-medium text-sm hover:bg-gray-200" onclick="alert('已儲存為草稿')">💾 暫存草稿</button>
+      <button class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium text-sm hover:bg-blue-700 shadow-md" onclick="showReportPreview()">📄 送出並產生報告</button>
+    </div>
+
+    <!-- History hint -->
+    <div class="px-4 pb-8">
+      <p class="text-xs text-gray-400 text-center">↑ 上次巡檢：2026-05-17 by 王工程師 · 結果：正常</p>
+    </div>
+  </div>
+
+  <!-- ============ REPORT PREVIEW ============ -->
+  <div id="reportView" class="hidden">
+    <div class="px-5 py-6">
+      <div class="text-center mb-6">
+        <p class="text-xs text-gray-400">PDF 報告預覽</p>
+        <h2 class="font-bold text-lg">機房設備巡檢報告</h2>
+        <p class="text-xs text-gray-400 mt-1">工單編號：WO-2026-0524-001</p>
+      </div>
+      <div class="bg-gray-50 rounded-xl p-5 mb-4 text-sm space-y-2">
+        <div class="flex justify-between"><span class="text-gray-500">設備編號</span><span class="font-medium">UPS-3F-A01</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">巡檢類型</span><span class="font-medium">UPS 不斷電系統</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">巡檢日期</span><span class="font-medium" id="reportDate">--</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">巡檢人員</span><span class="font-medium">王小明</span></div>
+        <hr class="my-2">
+        <div class="flex justify-between"><span class="text-gray-500">輸入電壓</span><span class="font-medium text-green-600">220V ✓</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">輸出電壓</span><span class="font-medium text-green-600">220V ✓</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">負載率</span><span class="font-medium">42%</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">電池狀態</span><span class="font-medium text-green-600">正常 ✓</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">現場照片</span><span class="font-medium">3 張</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">巡檢結果</span><span class="status-ok status-badge">正常</span></div>
+      </div>
+      <div class="flex gap-3 mb-4">
+        <button class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium text-sm" onclick="generatePDF()">📥 下載 PDF 報告</button>
+      </div>
+      <button class="w-full text-gray-400 text-sm py-2" onclick="closeReport()">← 返回表單</button>
+    </div>
+  </div>
+
+  <!-- ============ ADMIN VIEW (Form Builder) ============ -->
+  <div id="adminView" class="hidden">
+    <div class="px-5 py-4 bg-amber-50 border-b border-amber-100">
+      <p class="text-sm font-medium text-amber-800">🔧 管理者視角：表單模板管理</p>
+      <p class="text-xs text-amber-600">後台可新增 / 修改各設備類型的巡檢表單欄位</p>
+    </div>
+    <div class="px-4 py-4">
+      <div class="bg-white border rounded-xl overflow-hidden mb-4">
+        <div class="bg-slate-50 px-4 py-3 border-b flex justify-between items-center">
+          <p class="font-semibold text-sm">UPS 巡檢表單模板</p>
+          <button class="text-xs text-blue-600">✏️ 編輯</button>
+        </div>
+        <div class="px-4 py-3 text-xs space-y-2">
+          <div class="flex items-center gap-2"><span class="w-16 text-gray-400">輸入電壓</span><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">數值輸入</span><span class="text-gray-400">必填</span></div>
+          <div class="flex items-center gap-2"><span class="w-16 text-gray-400">輸出電壓</span><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">數值輸入</span><span class="text-gray-400">必填</span></div>
+          <div class="flex items-center gap-2"><span class="w-16 text-gray-400">負載率</span><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">數值輸入</span><span class="text-gray-400">%</span></div>
+          <div class="flex items-center gap-2"><span class="w-16 text-gray-400">電池狀態</span><span class="bg-green-50 text-green-700 px-2 py-0.5 rounded">下拉選單</span></div>
+          <div class="flex items-center gap-2"><span class="w-16 text-gray-400">外觀檢查</span><span class="bg-purple-50 text-purple-700 px-2 py-0.5 rounded">勾選清單</span></div>
+        </div>
+      </div>
+      <button class="w-full border-2 border-dashed border-gray-300 rounded-xl py-4 text-sm text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-colors">
+        ＋ 新增表單模板（如：發電機巡檢）
+      </button>
+    </div>
+    <div class="px-5 py-4 border-t">
+      <button class="w-full text-gray-400 text-sm py-2" onclick="toggleView()">← 返回工程師視角</button>
+    </div>
+  </div>
+
+  <!-- ============ QR SCAN OVERLAY ============ -->
+  <div id="qrOverlay" class="scan-overlay hidden" onclick="closeQR()">
+    <div class="bg-white rounded-2xl p-8 mx-6 text-center max-w-sm">
+      <div class="w-48 h-48 bg-gray-900 mx-auto rounded-xl mb-4 flex items-center justify-center">
+        <div class="w-40 h-40 bg-white rounded-lg flex items-center justify-center">
+          <span class="text-4xl">📱</span>
+        </div>
+      </div>
+      <p class="font-semibold mb-1">模擬 QR Code 掃描</p>
+      <p class="text-xs text-gray-400 mb-4">實際系統將呼叫裝置相機</br>掃描設備 QR Code 自動帶入資料</p>
+      <button class="bg-blue-600 text-white px-8 py-2 rounded-lg text-sm" onclick="closeQR()">模擬掃描完成</button>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto bg-white border-t flex" style="z-index:50">
+    <button class="flex-1 py-3 text-center text-xs text-blue-600 font-medium border-t-2 border-blue-600" onclick="switchTab('form')">📋 填表</button>
+    <button class="flex-1 py-3 text-center text-xs text-gray-400" onclick="switchTab('history')">📊 歷史</button>
+    <button class="flex-1 py-3 text-center text-xs text-gray-400" onclick="switchTab('me')">👤 我的</button>
+  </div>
+
+</div>
+
+<script>
+// ─── Clock ───
+function updateTime() {
+  const now = new Date();
+  document.getElementById('currentTime').textContent =
+    now.toLocaleString('zh-TW', { hour:'2-digit', minute:'2-digit', month:'numeric', day:'numeric' });
+}
+updateTime();
+setInterval(updateTime, 30000);
+
+// ─── Equipment Forms ───
+const forms = {
+  ups: {
+    name: 'UPS-3F-A01', detail: '3F 機房 · APC Smart-UPS 3000',
+    fields: [
+      { label: '輸入電壓 (V)', type: 'number', placeholder: '例: 220', unit: 'V' },
+      { label: '輸出電壓 (V)', type: 'number', placeholder: '例: 220', unit: 'V' },
+      { label: '負載率 (%)', type: 'number', placeholder: '例: 42', unit: '%' },
+      { label: '電池狀態', type: 'select', options: ['正常', '需注意', '異常'] },
+      { label: '外觀檢查', type: 'checkbox', items: ['外殼無破損', '風扇運轉正常', '無異音', '指示燈正常'] },
+    ]
+  },
+  inrow: {
+    name: 'CRAC-3F-B02', detail: '3F 機房 · InRow 精密空調',
+    fields: [
+      { label: '進風溫度 (°C)', type: 'number', placeholder: '例: 22', unit: '°C' },
+      { label: '出風溫度 (°C)', type: 'number', placeholder: '例: 18', unit: '°C' },
+      { label: '濕度 (%)', type: 'number', placeholder: '例: 50', unit: '%' },
+      { label: '濾網狀態', type: 'select', options: ['乾淨', '需清潔', '需更換'] },
+      { label: '檢查項目', type: 'checkbox', items: ['冷媒壓力正常', '排水暢通', '風扇無異音', '壓縮機正常'] },
+    ]
+  },
+  fire: {
+    name: 'FIRE-3F-C01', detail: '3F 機房 · 氣體滅火系統',
+    fields: [
+      { label: '鋼瓶壓力 (MPa)', type: 'number', placeholder: '例: 15', unit: 'MPa' },
+      { label: '探測器狀態', type: 'select', options: ['正常', '需更換', '異常'] },
+      { label: '檢查項目', type: 'checkbox', items: ['鋼瓶固定穩妥', '噴嘴無阻塞', '警報測試正常', '標示清晰'] },
+    ]
+  },
+  env: {
+    name: 'ENV-3F-D01', detail: '3F 機房 · 環控主機',
+    fields: [
+      { label: '溫度讀值 (°C)', type: 'number', placeholder: '例: 23', unit: '°C' },
+      { label: '濕度讀值 (%)', type: 'number', placeholder: '例: 48', unit: '%' },
+      { label: '漏水偵測', type: 'select', options: ['正常', '警報'] },
+      { label: '檢查項目', type: 'checkbox', items: ['感測器訊號正常', '警報通報測試', '歷史資料無斷線'] },
+    ]
+  },
+  cabinet: {
+    name: 'RACK-3F-E01', detail: '3F 機房 · 42U 標準機櫃',
+    fields: [
+      { label: '櫃內溫度 (°C)', type: 'number', placeholder: '例: 25', unit: '°C' },
+      { label: '纜線整理狀態', type: 'select', options: ['良好', '需整理', '雜亂'] },
+      { label: '檢查項目', type: 'checkbox', items: ['前後門關閉正常', '濾網清潔', '設備固定穩妥', '無異物堆積'] },
+    ]
+  },
+};
+
+let currentEquip = 'ups';
+
+function switchEquip(type, btn) {
+  currentEquip = type;
+  document.querySelectorAll('#equipTabs button').forEach(b => {
+    b.className = 'text-xs px-3 py-1.5 rounded-full whitespace-nowrap border border-gray-200 text-gray-500';
+  });
+  btn.className = 'tab-active text-xs px-3 py-1.5 rounded-full whitespace-nowrap bg-blue-50';
+  document.getElementById('equipName').textContent = forms[type].name;
+  document.getElementById('equipDetail').textContent = forms[type].detail;
+  renderFields(forms[type].fields);
+}
+
+function renderFields(fields) {
+  let html = '';
+  fields.forEach((f, i) => {
+    html += '<div class="field-card">';
+    html += '<label class="text-sm font-medium block mb-2">' + (i+1) + '. ' + f.label;
+    if (f.unit) html += ' <span class="text-xs text-gray-400">(' + f.unit + ')</span>';
+    html += '</label>';
+
+    if (f.type === 'number') {
+      html += '<input type="number" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="' + (f.placeholder || '') + '">';
+    } else if (f.type === 'select') {
+      html += '<select class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">';
+      f.options.forEach(o => { html += '<option>' + o + '</option>'; });
+      html += '</select>';
+    } else if (f.type === 'checkbox') {
+      f.items.forEach(item => {
+        html += '<label class="flex items-center gap-2 py-1 text-sm">';
+        html += '<input type="checkbox" class="rounded" onchange="this.parentElement.classList.toggle(\'text-green-600\')"> ' + item;
+        html += '</label>';
+      });
+    }
+
+    html += '</div>';
+  });
+  document.getElementById('formFields').innerHTML = html;
+}
+
+function simulateQRScan() {
+  document.getElementById('qrOverlay').classList.remove('hidden');
+}
+function closeQR() {
+  document.getElementById('qrOverlay').classList.add('hidden');
+  document.getElementById('equipInfo').style.background = '#f0fdf4';
+  setTimeout(() => { document.getElementById('equipInfo').style.background = '#fff'; }, 1000);
+}
+
+function showReportPreview() {
+  document.getElementById('engineerView').classList.add('hidden');
+  document.getElementById('reportView').classList.remove('hidden');
+  document.getElementById('reportDate').textContent =
+    new Date().toLocaleString('zh-TW', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+}
+function closeReport() {
+  document.getElementById('reportView').classList.add('hidden');
+  document.getElementById('engineerView').classList.remove('hidden');
+}
+
+function toggleView() {
+  const ev = document.getElementById('engineerView');
+  const av = document.getElementById('adminView');
+  const rv = document.getElementById('reportView');
+  rv.classList.add('hidden');
+  if (ev.classList.contains('hidden')) {
+    ev.classList.remove('hidden');
+    av.classList.add('hidden');
+  } else {
+    ev.classList.add('hidden');
+    av.classList.remove('hidden');
+  }
+}
+
+function switchTab(tab) {
+  const btns = document.querySelectorAll('.fixed.bottom-0 button');
+  btns.forEach(b => { b.className = 'flex-1 py-3 text-center text-xs text-gray-400'; });
+  if (tab === 'form') {
+    btns[0].className = 'flex-1 py-3 text-center text-xs text-blue-600 font-medium border-t-2 border-blue-600';
+    document.getElementById('engineerView').classList.remove('hidden');
+    document.getElementById('reportView').classList.add('hidden');
+  } else if (tab === 'history') {
+    btns[1].className = 'flex-1 py-3 text-center text-xs text-blue-600 font-medium border-t-2 border-blue-600';
+    alert('📊 歷史紀錄列表（實際系統將顯示過往工單）\n\n2026-05-17  UPS 巡檢  正常  ✅\n2026-05-10  InRow 空調  需注意  ⚠️\n2026-05-03  消防設備  正常  ✅');
+  } else {
+    btns[2].className = 'flex-1 py-3 text-center text-xs text-blue-600 font-medium border-t-2 border-blue-600';
+    alert('👤 王小明 工程師\n\n📋 本月巡檢次數：12\n✅ 完成率：100%\n🔐 權限：工程師');
+  }
+}
+
+// ─── Init ───
+renderFields(forms.ups.fields);
+
+// ─── PWA hint ───
+function generatePDF() {
+  const reportEl = document.querySelector('#reportView .bg-gray-50');
+  html2canvas(reportEl, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+    const { jsPDF } = window.jspdf;
+    const imgData = canvas.toDataURL('image/png');
+    const imgW = 190; // A4 width minus margins
+    const imgH = (canvas.height * imgW) / canvas.width;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    pdf.addImage(imgData, 'PNG', 10, 10, imgW, imgH);
+    pdf.save('巡檢報告_' + new Date().toISOString().slice(0,10) + '.pdf');
+  });
+}
+
+console.log('📱 此系統建議以 PWA 方式部署，支援：');
+console.log('  - Service Worker 離線快取');
+console.log('  - IndexedDB 離線填表，連線後同步');
+console.log('  - 手機/平板加入主畫面，全螢幕體驗');
+console.log('  - PDF 報告：前端 html2canvas + jsPDF 直接輸出，免後端');
+</script>
+
+</body>
+</html>

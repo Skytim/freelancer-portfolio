@@ -1,0 +1,34 @@
+User-agent: *
+Allow: /
+Disallow: /wp-admin/
+Disallow: /wp-content/plugins/
+Disallow: /wp-content/themes/
+Disallow: /wp-includes/
+Disallow: /xmlrpc.php
+Disallow: /wp-login.php
+Disallow: /*?s=
+Disallow: /*?replytocom=
+
+# Sitemap
+Sitemap: https://www.kanghe-clinic.tw/sitemap_index.xml
+
+# Crawl-delay
+Crawl-delay: 10
+
+# Specific bots
+User-agent: GPTBot
+Allow: /
+Disallow: /wp-admin/
+
+User-agent: CCBot
+Allow: /
+Disallow: /wp-admin/
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /wp-admin/
+
+User-agent: Googlebot
+Allow: /
+Disallow: /wp-admin/
+Crawl-delay: 2
