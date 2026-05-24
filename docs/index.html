@@ -1,72 +1,133 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>全端開發工程師 · 作品集 Portfolio</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Inter:wght@500;700;900&display=swap');body{font-family:'Noto Sans TC',sans-serif;background:#0f172a;color:#e2e8f0}.card{background:#1e293b;border:1px solid #334155;border-radius:16px;transition:all .25s}.card:hover{transform:translateY(-4px);border-color:#3b82f6;box-shadow:0 8px 40px rgba(59,130,246,.15)}</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>全端開發工程師 — 作品集</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
+  a { text-decoration: none; color: inherit; }
+  .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  .hero { padding: 80px 0 48px; border-bottom: 1px solid #e5e5e5; }
+  .hero h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+  .hero p { color: #666; font-size: 16px; max-width: 520px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .tag { font-size: 13px; color: #555; background: #f0f0f0; padding: 4px 12px; border-radius: 4px; }
+
+  /* Section */
+  .section { padding: 56px 0; }
+  .section h2 { font-size: 20px; font-weight: 700; margin-bottom: 24px; }
+
+  /* Project cards */
+  .projects { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .projects { grid-template-columns: 1fr; } }
+  .project { border: 1px solid #e5e5e5; border-radius: 8px; padding: 24px; background: #fff; transition: border-color .2s; }
+  .project:hover { border-color: #999; }
+  .project h3 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+  .project .meta { font-size: 13px; color: #888; margin-bottom: 12px; }
+  .project .desc { font-size: 14px; color: #444; line-height: 1.6; }
+  .project .stack { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .project .stack span { font-size: 12px; color: #555; background: #f5f5f5; padding: 2px 10px; border-radius: 3px; }
+  .project.full { grid-column: 1 / -1; }
+
+  /* About */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  @media (max-width: 640px) { .about-grid { grid-template-columns: 1fr; } }
+  .about-grid h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .about-grid ul { list-style: none; font-size: 14px; color: #555; }
+  .about-grid li { padding: 4px 0; }
+  .about-grid li::before { content: "— "; color: #ccc; }
+
+  /* Footer */
+  footer { border-top: 1px solid #e5e5e5; padding: 40px 0; text-align: center; font-size: 14px; color: #999; }
+  footer a { color: #555; }
+  footer a:hover { color: #000; }
+</style>
 </head>
-<body class="min-h-screen">
+<body>
 
-<header class="text-center pt-20 pb-12 px-6">
-  <div class="inline-flex items-center gap-2 bg-blue-900/40 border border-blue-700/40 rounded-full px-4 py-1.5 text-xs text-blue-300 mb-6">
-    <span class="w-2 h-2 bg-green-400 rounded-full"></span> 開放接案中
+<div class="container">
+  <div class="hero">
+    <h1>全端開發工程師</h1>
+    <p>專注 Java Spring Boot 後端與 Vue 3 前端，提供企業系統開發、ERP 建置、資料工具與網站製作。</p>
+    <div class="tags">
+      <span class="tag">Java / Spring Boot 3</span>
+      <span class="tag">Vue 3 + Vuetify</span>
+      <span class="tag">PostgreSQL / MySQL</span>
+      <span class="tag">Docker</span>
+      <span class="tag">RESTful API</span>
+    </div>
   </div>
-  <h1 class="text-4xl md:text-5xl font-bold mb-4">全端開發工程師</h1>
-  <p class="text-slate-400 max-w-lg mx-auto leading-relaxed">Spring Boot · Vue 3 · PostgreSQL<br>專精企業管理系統、ERP、電子表單、資料工具</p>
-  <div class="flex justify-center gap-4 mt-8 flex-wrap">
-    <span class="bg-slate-800 border border-slate-700 rounded-full px-4 py-1.5 text-xs">Java</span>
-    <span class="bg-slate-800 border border-slate-700 rounded-full px-4 py-1.5 text-xs">Spring Boot</span>
-    <span class="bg-slate-800 border border-slate-700 rounded-full px-4 py-1.5 text-xs">Vue.js</span>
-    <span class="bg-slate-800 border border-slate-700 rounded-full px-4 py-1.5 text-xs">PostgreSQL</span>
-    <span class="bg-slate-800 border border-slate-700 rounded-full px-4 py-1.5 text-xs">Docker</span>
-    <span class="bg-slate-800 border border-slate-700 rounded-full px-4 py-1.5 text-xs">RESTful API</span>
+
+  <div class="section">
+    <h2>作品集</h2>
+    <div class="projects">
+      <a href="/freelancer-portfolio/erp-dashboard/" class="project">
+        <h3>進銷存 ERP 管理後台</h3>
+        <div class="meta">企業管理 · 多分店庫存</div>
+        <div class="desc">商品管理、進貨單與出貨單登錄、即時庫存查詢、低庫存警示、報表中心。支援多分店獨立庫存管理。</div>
+        <div class="stack"><span>Spring Boot 3</span><span>Vue 3</span><span>Vuetify</span><span>PostgreSQL</span></div>
+      </a>
+      <a href="/freelancer-portfolio/eform/" class="project">
+        <h3>機房巡檢電子表單</h3>
+        <div class="meta">PWA · QR Code · 動態表單</div>
+        <div class="desc">平板巡檢表單系統，動態表單引擎（JSON Schema 驅動）、QR Code 設備掃描、現場拍照綁定工單、PDF 報告一鍵輸出。</div>
+        <div class="stack"><span>Spring Boot 3</span><span>Vue 3</span><span>JWT</span><span>PWA</span></div>
+      </a>
+      <a href="/freelancer-portfolio/ai-automation/" class="project">
+        <h3>AI 自動化工作流平台</h3>
+        <div class="meta">AI Agent · n8n · 流程管線</div>
+        <div class="desc">AI Agent 管理與排程、工作流管線編輯、執行日誌追蹤、模板市集。可串接 GPT / Claude 等模型自動化處理。</div>
+        <div class="stack"><span>n8n</span><span>LangChain</span><span>GPT</span><span>Python</span></div>
+      </a>
+      <a href="/freelancer-portfolio/data-scraper/" class="project">
+        <h3>資料爬取與提取工具</h3>
+        <div class="meta">Web Scraping · CSS Selector · 排程</div>
+        <div class="desc">目標網址設定、擷取規則配置、自動翻頁、代理 IP 輪換、CSV / JSON 匯出。支援排程定時爬取與歷史查詢。</div>
+        <div class="stack"><span>Python</span><span>Scrapy</span><span>Puppeteer</span><span>PostgreSQL</span></div>
+      </a>
+      <a href="/freelancer-portfolio/clinic-seo/" class="project full">
+        <h3>醫療診所 SEO / AIEO 網站</h3>
+        <div class="meta">WordPress · Schema.org · llms.txt</div>
+        <div class="desc">醫療診所 WordPress 主題，內建 Schema.org MedicalClinic 結構化資料、llms.txt AI 搜尋友善標記、Open Graph 社群分享優化、PageSpeed 效能調校。含 6 個頁面：首頁、診所介紹、服務項目、醫師團隊、健康專欄、預約掛號。</div>
+        <div class="stack"><span>WordPress</span><span>PHP</span><span>SEO</span><span>AIEO</span><span>Schema.org</span></div>
+      </a>
+    </div>
   </div>
-</header>
 
-<main class="max-w-5xl mx-auto px-6 pb-20">
-  <div class="grid md:grid-cols-2 gap-5">
-
-    <a href="/freelancer-portfolio/erp-dashboard/" class="card p-6">
-      <div class="text-3xl mb-3">📦</div>
-      <h2 class="text-lg font-bold text-white mb-1">進銷存 ERP 管理後台</h2>
-      <p class="text-sm text-slate-400 leading-relaxed">商品管理 · 進出貨單 · 庫存即時查詢 · 多分店 · 低庫存警示</p>
-      <div class="flex gap-2 mt-4"><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">Spring Boot</span><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">Vue 3</span><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">Vuetify</span></div>
-    </a>
-
-    <a href="/freelancer-portfolio/eform/" class="card p-6">
-      <div class="text-3xl mb-3">📋</div>
-      <h2 class="text-lg font-bold text-white mb-1">機房巡檢電子表單</h2>
-      <p class="text-sm text-slate-400 leading-relaxed">動態表單引擎 · QR Code 掃描 · 拍照綁定 · PDF 報告 · PWA 離線</p>
-      <div class="flex gap-2 mt-4"><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">Spring Boot</span><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">Vue 3</span><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">JWT</span></div>
-    </a>
-
-    <a href="/freelancer-portfolio/ai-automation/" class="card p-6">
-      <div class="text-3xl mb-3">🤖</div>
-      <h2 class="text-lg font-bold text-white mb-1">AI 自動化工作流平台</h2>
-      <p class="text-sm text-slate-400 leading-relaxed">AI Agent 管理 · 工作流編輯器 · 執行日誌 · 模板市集 · 流程管線</p>
-      <div class="flex gap-2 mt-4"><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">n8n</span><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">LangChain</span><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">GPT</span></div>
-    </a>
-
-    <a href="/freelancer-portfolio/data-scraper/" class="card p-6">
-      <div class="text-3xl mb-3">🕷</div>
-      <h2 class="text-lg font-bold text-white mb-1">資料爬取與提取工具</h2>
-      <p class="text-sm text-slate-400 leading-relaxed">CSS Selector 配置 · 自動翻頁 · 排程管理 · CSV/JSON 匯出 · 代理 IP</p>
-      <div class="flex gap-2 mt-4"><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">Python</span><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">Scrapy</span><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">Puppeteer</span></div>
-    </a>
-
-    <a href="/freelancer-portfolio/clinic-seo/" class="card p-6 md:col-span-2">
-      <div class="text-3xl mb-3">🏥</div>
-      <h2 class="text-lg font-bold text-white mb-1">醫療診所 SEO / AIEO 網站</h2>
-      <p class="text-sm text-slate-400 leading-relaxed">Schema.org 結構化資料 · llms.txt · Open Graph · PageSpeed 優化 · WordPress Theme</p>
-      <div class="flex gap-2 mt-4"><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">WordPress</span><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">SEO</span><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">AIEO</span><span class="text-xs bg-slate-700 px-2 py-0.5 rounded">PHP</span></div>
-    </a>
-
+  <div class="section">
+    <h2>關於</h2>
+    <div class="about-grid">
+      <div>
+        <h3>技術棧</h3>
+        <ul>
+          <li>後端：Java Spring Boot 3、Spring Security + JWT、JPA / Hibernate</li>
+          <li>前端：Vue 3 (Composition API)、Vuetify 3、TypeScript</li>
+          <li>資料庫：PostgreSQL、MySQL、H2 (開發用)</li>
+          <li>工具：Docker、Git、GitHub Actions、Maven</li>
+        </ul>
+      </div>
+      <div>
+        <h3>服務方式</h3>
+        <ul>
+          <li>遠端協作，需求訪談後提供報價與時程</li>
+          <li>交付完整原始碼，業主完全自有</li>
+          <li>無平台月費綁定</li>
+          <li>結案後提供操作教學與技術文件</li>
+        </ul>
+      </div>
+    </div>
   </div>
-</main>
+</div>
 
-<footer class="text-center pb-12 text-xs text-slate-600">
-  © 2026 · 全端開發接案 · 可遠端協作
+<footer>
+  <div class="container">
+    <p>© 2026 · 全端開發接案 · 可遠端協作</p>
+    <p style="margin-top:4px">sky22357168@gmail.com · 0921-789-168</p>
+  </footer>
 </footer>
 
 </body>
