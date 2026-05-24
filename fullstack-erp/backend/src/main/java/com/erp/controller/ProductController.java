@@ -1,15 +1,17 @@
 package com.erp.controller;
+
 import com.erp.dto.ApiResponse;
 import com.erp.model.Product;
 import com.erp.repository.ProductRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@RestController @RequestMapping("/api/products") @RequiredArgsConstructor
+@RestController @RequestMapping("/api/products")
 public class ProductController {
+
     private final ProductRepository repo;
+    public ProductController(ProductRepository repo) { this.repo = repo; }
 
     @GetMapping
     public ApiResponse<List<Product>> list(@RequestParam(required=false) String search) {
@@ -34,9 +36,9 @@ public class ProductController {
 
     @GetMapping("/stats")
     public ApiResponse<Map<String,Object>> stats() {
-        List<Product> all = repo.findAll();
+        var all = repo.findAll();
         long lowStock = all.stream().filter(p -> p.getStockQty() < p.getSafetyStock()).count();
         int totalItems = all.stream().mapToInt(Product::getStockQty).sum();
-        return ApiResponse.ok(Map.of("totalProducts", all.size(), "lowStock", lowStock, "totalItems", totalItems));
+        return ApiResponse.ok(Map.of("totalProducts",all.size(),"lowStock",lowStock,"totalItems",totalItems));
     }
 }

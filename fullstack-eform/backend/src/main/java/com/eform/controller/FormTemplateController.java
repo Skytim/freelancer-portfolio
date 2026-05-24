@@ -3,14 +3,13 @@ package com.eform.controller;
 import com.eform.dto.ApiResponse;
 import com.eform.model.FormTemplate;
 import com.eform.repository.FormTemplateRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/templates")
-@RequiredArgsConstructor
+
 public class FormTemplateController {
 
     private final FormTemplateRepository repo;
@@ -25,6 +24,11 @@ public class FormTemplateController {
         return repo.findByTemplateKey(key)
                 .map(ApiResponse::ok)
                 .orElse(ApiResponse.fail("模板不存在"));
+    }
+
+
+    public FormTemplateController(FormTemplateRepository repo) {
+        this.repo = repo;
     }
 
     @PostMapping

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>永鑫實業 | 專業五金零件批發零售 — 網站改版概念</title>
+<meta name="description" content="永鑫實業提供專業五金零件、工業耗材批發零售。30 年產業經驗，服務超過 500 家企業客戶。">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Oswald:wght@500;700&display=swap');
+  body { font-family: 'Noto Sans TC', sans-serif; }
+  .font-display { font-family: 'Oswald', 'Noto Sans TC', sans-serif; }
+  .bg-industrial { background: linear-gradient(160deg, #1a1d23 0%, #232832 40%, #1e2129 100%); }
+  .accent-gradient { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+  .card-industrial { background: linear-gradient(145deg, #2a2d35, #22252d); }
+  .glow { box-shadow: 0 0 40px rgba(245, 158, 11, 0.08); }
+</style>
+</head>
+<body class="bg-industrial text-gray-300">
+
+<!-- Navbar -->
+<nav class="fixed top-0 w-full bg-[#1a1d23]/95 backdrop-blur-md z-50 border-b border-gray-800">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <div class="w-8 h-8 accent-gradient rounded flex items-center justify-center text-gray-900 font-bold text-sm">永</div>
+      <span class="font-bold text-white text-lg tracking-wide">永鑫<span class="text-amber-500">實業</span></span>
+    </div>
+    <div class="hidden md:flex space-x-8 text-sm">
+      <a href="#" class="text-white font-medium border-b-2 border-amber-500 pb-1">首頁</a>
+      <a href="#" class="hover:text-white transition-colors">產品型錄</a>
+      <a href="#" class="hover:text-white transition-colors">產業應用</a>
+      <a href="#" class="hover:text-white transition-colors">關於我們</a>
+      <a href="#" class="hover:text-white transition-colors">詢價專區</a>
+    </div>
+    <a href="#" class="accent-gradient text-gray-900 px-5 py-2 rounded text-sm font-bold hover:opacity-90 transition-opacity">立即詢價</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="pt-32 pb-24 px-6">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+    <div>
+      <div class="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-4 py-1.5 text-xs text-amber-400 mb-6">
+        <span class="w-2 h-2 bg-amber-500 rounded-full"></span>
+        30 年產業經驗 · 服務 500+ 企業
+      </div>
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-white leading-tight mb-6">
+        精密五金<br><span class="text-amber-500">一站到位</span>
+      </h1>
+      <p class="text-gray-400 text-lg leading-relaxed mb-8 max-w-md">
+        從標準件到特殊規格，提供各類工業五金零件、緊固件、軸承與模具配件。批發零售皆可，專業團隊為你精準配貨。
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a href="#" class="accent-gradient text-gray-900 px-8 py-3.5 rounded-lg text-sm font-bold hover:opacity-90 transition-opacity shadow-lg">索取型錄</a>
+        <a href="#" class="border border-gray-600 text-white px-8 py-3.5 rounded-lg text-sm font-medium hover:border-amber-500 transition-colors">產品搜尋</a>
+      </div>
+    </div>
+    <div class="relative">
+      <div class="card-industrial rounded-2xl p-1 glow">
+        <div class="bg-[#1a1d23] rounded-xl aspect-[4/3] flex items-center justify-center">
+          <p class="text-gray-600 text-lg">[ 產品展示 / 工廠實景 ]</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Bar -->
+<section class="py-12 px-6 border-y border-gray-800">
+  <div class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+    <div>
+      <p class="text-3xl font-display font-bold text-white">30+</p>
+      <p class="text-xs text-gray-500 mt-1">年產業經驗</p>
+    </div>
+    <div>
+      <p class="text-3xl font-display font-bold text-white">500+</p>
+      <p class="text-xs text-gray-500 mt-1">企業客戶信賴</p>
+    </div>
+    <div>
+      <p class="text-3xl font-display font-bold text-white">20,000+</p>
+      <p class="text-xs text-gray-500 mt-1">品項現貨供應</p>
+    </div>
+    <div>
+      <p class="text-3xl font-display font-bold text-white">48h</p>
+      <p class="text-xs text-gray-500 mt-1">快速出貨保證</p>
+    </div>
+  </div>
+</section>
+
+<!-- Product Categories -->
+<section class="py-24 px-6 max-w-7xl mx-auto">
+  <div class="text-center mb-16">
+    <span class="text-amber-500 text-xs tracking-[0.2em] uppercase">Product Categories</span>
+    <h2 class="text-3xl md:text-4xl font-display font-bold text-white mt-2">產品分類</h2>
+    <p class="text-gray-500 mt-4 max-w-lg mx-auto">完整產品線涵蓋機械、電子、建築等產業應用</p>
+  </div>
+  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="card-industrial rounded-xl p-8 hover:border-amber-500/30 border border-transparent transition-all cursor-pointer group">
+      <div class="text-3xl mb-4">🔩</div>
+      <h3 class="text-white font-bold mb-2 group-hover:text-amber-400 transition-colors">緊固件系列</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">螺栓、螺帽、墊圈、銷鍵，多種材質與規格</p>
+    </div>
+    <div class="card-industrial rounded-xl p-8 hover:border-amber-500/30 border border-transparent transition-all cursor-pointer group">
+      <div class="text-3xl mb-4">⚙️</div>
+      <h3 class="text-white font-bold mb-2 group-hover:text-amber-400 transition-colors">軸承與傳動</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">滾珠軸承、直線軸承、皮帶輪、聯軸器</p>
+    </div>
+    <div class="card-industrial rounded-xl p-8 hover:border-amber-500/30 border border-transparent transition-all cursor-pointer group">
+      <div class="text-3xl mb-4">🔧</div>
+      <h3 class="text-white font-bold mb-2 group-hover:text-amber-400 transition-colors">手工具</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">扳手、起子、鉗類、套筒，專業級品質</p>
+    </div>
+    <div class="card-industrial rounded-xl p-8 hover:border-amber-500/30 border border-transparent transition-all cursor-pointer group">
+      <div class="text-3xl mb-4">📐</div>
+      <h3 class="text-white font-bold mb-2 group-hover:text-amber-400 transition-colors">模具配件</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">衝頭、導柱、彈簧、定位銷，客製化服務</p>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Product Showcase -->
+<section class="py-24 px-6 bg-[#111318]">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <span class="text-amber-500 text-xs tracking-[0.2em] uppercase">Featured</span>
+      <h2 class="text-3xl md:text-4xl font-display font-bold text-white mt-2">熱門產品</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="group cursor-pointer">
+        <div class="card-industrial rounded-xl aspect-square mb-4 flex items-center justify-center">
+          <span class="text-gray-600">[ 產品圖 ]</span>
+        </div>
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-xs text-amber-500">SUS304</span>
+            <h3 class="text-white font-medium mt-1">不鏽鋼內六角螺絲 M6</h3>
+          </div>
+          <a href="#" class="text-xs text-amber-500 border border-amber-500/30 rounded px-3 py-1 hover:bg-amber-500 hover:text-gray-900 transition-all whitespace-nowrap ml-4">詢價</a>
+        </div>
+      </div>
+      <div class="group cursor-pointer">
+        <div class="card-industrial rounded-xl aspect-square mb-4 flex items-center justify-center">
+          <span class="text-gray-600">[ 產品圖 ]</span>
+        </div>
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-xs text-amber-500">軸承鋼</span>
+            <h3 class="text-white font-medium mt-1">深溝滾珠軸承 6204</h3>
+          </div>
+          <a href="#" class="text-xs text-amber-500 border border-amber-500/30 rounded px-3 py-1 hover:bg-amber-500 hover:text-gray-900 transition-all whitespace-nowrap ml-4">詢價</a>
+        </div>
+      </div>
+      <div class="group cursor-pointer">
+        <div class="card-industrial rounded-xl aspect-square mb-4 flex items-center justify-center">
+          <span class="text-gray-600">[ 產品圖 ]</span>
+        </div>
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-xs text-amber-500">工具鋼</span>
+            <h3 class="text-white font-medium mt-1">棘輪扳手組 12 件式</h3>
+          </div>
+          <a href="#" class="text-xs text-amber-500 border border-amber-500/30 rounded px-3 py-1 hover:bg-amber-500 hover:text-gray-900 transition-all whitespace-nowrap ml-4">詢價</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Company Intro -->
+<section class="py-24 px-6 max-w-7xl mx-auto">
+  <div class="grid md:grid-cols-2 gap-16 items-center">
+    <div class="card-industrial rounded-2xl aspect-[4/3] flex items-center justify-center">
+      <span class="text-gray-600">[ 公司 / 倉庫實景 ]</span>
+    </div>
+    <div>
+      <span class="text-amber-500 text-xs tracking-[0.2em] uppercase">About Us</span>
+      <h2 class="text-3xl md:text-4xl font-display font-bold text-white mt-2 mb-6">永鑫實業的故事</h2>
+      <p class="text-gray-400 leading-relaxed mb-4">
+        創立於 1996 年，從一間小型五金行起步，逐步發展為涵蓋緊固件、軸承、手工具與模具配件的專業供應商。
+      </p>
+      <p class="text-gray-400 leading-relaxed mb-6">
+        我們的信念：不只是賣零件，更是為客戶的生產線提供穩定可靠的後勤支援。因為一顆螺絲的品質，決定了整台機器的安全。
+      </p>
+      <div class="flex flex-wrap gap-6 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-500">✓</span>
+          <span class="text-gray-300">ISO 9001 認證</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-amber-500">✓</span>
+          <span class="text-gray-300">材質證明隨貨</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-amber-500">✓</span>
+          <span class="text-gray-300">客製化特殊規格</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Industry Applications -->
+<section class="py-24 px-6 bg-[#111318]">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <span class="text-amber-500 text-xs tracking-[0.2em] uppercase">Industries</span>
+      <h2 class="text-3xl md:text-4xl font-display font-bold text-white mt-2">產業應用</h2>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="text-center p-6 card-industrial rounded-xl">
+        <div class="text-2xl mb-3">🏭</div>
+        <p class="text-white text-sm font-medium">機械製造</p>
+      </div>
+      <div class="text-center p-6 card-industrial rounded-xl">
+        <div class="text-2xl mb-3">🔌</div>
+        <p class="text-white text-sm font-medium">電子組裝</p>
+      </div>
+      <div class="text-center p-6 card-industrial rounded-xl">
+        <div class="text-2xl mb-3">🏗️</div>
+        <p class="text-white text-sm font-medium">營建工程</p>
+      </div>
+      <div class="text-center p-6 card-industrial rounded-xl">
+        <div class="text-2xl mb-3">🚗</div>
+        <p class="text-white text-sm font-medium">汽機車零組件</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 px-6 text-center">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-3xl md:text-4xl font-display font-bold text-white mb-4">需要大量採購或特殊規格？</h2>
+    <p class="text-gray-400 mb-10">填寫詢價單，我們的業務團隊將在 24 小時內回覆報價。</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="#" class="accent-gradient text-gray-900 px-10 py-4 rounded-lg text-sm font-bold hover:opacity-90 transition-opacity shadow-lg">填寫詢價單</a>
+      <a href="#" class="border border-gray-600 text-white px-10 py-4 rounded-lg text-sm font-medium hover:border-amber-500 transition-colors">下載型錄 PDF</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="border-t border-gray-800 py-16 px-6">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-8 text-sm">
+    <div>
+      <h4 class="text-white font-bold mb-4">永鑫實業</h4>
+      <p class="text-xs text-gray-500 leading-relaxed">專業五金零件供應商<br>批發零售 · 客製化服務 · 全台配送</p>
+    </div>
+    <div>
+      <h4 class="text-white font-medium mb-4">產品總覽</h4>
+      <ul class="space-y-2 text-xs text-gray-500">
+        <li><a href="#" class="hover:text-amber-400 transition-colors">緊固件</a></li>
+        <li><a href="#" class="hover:text-amber-400 transition-colors">軸承傳動</a></li>
+        <li><a href="#" class="hover:text-amber-400 transition-colors">手工具</a></li>
+        <li><a href="#" class="hover:text-amber-400 transition-colors">模具配件</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white font-medium mb-4">服務項目</h4>
+      <ul class="space-y-2 text-xs text-gray-500">
+        <li><a href="#" class="hover:text-amber-400 transition-colors">詢價流程</a></li>
+        <li><a href="#" class="hover:text-amber-400 transition-colors">大量採購</a></li>
+        <li><a href="#" class="hover:text-amber-400 transition-colors">特殊訂製</a></li>
+        <li><a href="#" class="hover:text-amber-400 transition-colors">退換貨政策</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white font-medium mb-4">聯絡我們</h4>
+      <ul class="space-y-2 text-xs text-gray-500">
+        <li>📍 新北市中和區○○路</li>
+        <li>📞 (02) XXXX-XXXX</li>
+        <li>📧 sales@yongxin.tw</li>
+        <li>🕐 週一至週五 08:00-18:00</li>
+      </ul>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto mt-12 pt-8 border-t border-gray-800 text-center text-xs text-gray-600">
+    <p>© 2026 永鑫實業. WordPress 架設 · 網站改版設計.</p>
+  </div>
+</footer>
+
+</body>
+</html>

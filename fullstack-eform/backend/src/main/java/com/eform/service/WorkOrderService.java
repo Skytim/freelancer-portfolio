@@ -4,7 +4,6 @@ import com.eform.dto.WorkOrderRequest;
 import com.eform.model.WorkOrder;
 import com.eform.model.WorkOrder.Status;
 import com.eform.repository.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,13 +11,21 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+
 public class WorkOrderService {
 
     private final WorkOrderRepository woRepo;
     private final EquipmentRepository equipRepo;
     private final FormTemplateRepository tmplRepo;
     private final UserRepository userRepo;
+
+
+    public WorkOrderService(WorkOrderRepository woRepo, EquipmentRepository equipRepo, FormTemplateRepository tmplRepo, UserRepository userRepo) {
+        this.woRepo = woRepo;
+        this.equipRepo = equipRepo;
+        this.tmplRepo = tmplRepo;
+        this.userRepo = userRepo;
+    }
 
     public WorkOrder create(WorkOrderRequest req, String username) {
         var equip = equipRepo.findByCode(req.getEquipmentCode())
@@ -29,16 +36,15 @@ public class WorkOrderService {
                 .orElseThrow(() -> new RuntimeException("使用者不存在"));
 
         String orderNo = "WO-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
-        var wo = WorkOrder.builder()
-                .orderNo(orderNo)
-                .equipment(equip)
-                .template(tmpl)
-                .inspector(user)
-                .formData(req.getFormData())
-                .notes(req.getNotes())
-                .photoUrls(req.getPhotoUrls())
-                .status(Status.SUBMITTED)
-                .build();
+        WorkOrder wo = new WorkOrder();
+        wo.setOrderNo(orderNo);
+        wo.setEquipment(equip);
+        wo.setTemplate(tmpl);
+        wo.setInspector(user);
+        wo.setFormData(req.getFormData());
+        wo.setNotes(req.getNotes());
+        wo.setPhotoUrls(req.getPhotoUrls());
+        wo.setStatus(Status.SUBMITTED);
         return woRepo.save(wo);
     }
 

@@ -1,0 +1,57 @@
+李小姐您好，
+
+看到貴診所的 WordPress 升級需求，以下是我的服務提案：
+
+
+【醫療 SEO/AIEO 作品展示】
+
+我已為本案建置了醫療診所 SEO 示範網站，請直接點擊查看：
+
+1. 診所 Demo 網站（6 頁）：
+   https://silver-crepe-665c1a.netlify.app
+
+2. llms.txt（AI 搜尋引擎友善設定）：
+   https://silver-crepe-665c1a.netlify.app/llms.txt
+
+3. Schema.org MedicalClinic 結構化資料驗證：
+   https://search.google.com/test/rich-results/result?id=8C72g1xpDda9J1vn3vwK7g
+   （Google Rich Results Test 官方驗證通過）
+
+
+【一次性網站升級】NT$ 25,000
+
+．主選單優化（桌面版 + 手機版 RWD 動線重整）
+．SEO 技術部署（Schema.org JSON-LD、llms.txt、Meta 標籤）
+．HTML 語意架構調整（H1-H6、header/main/footer）
+．PageSpeed 效能優化（圖片壓縮、快取，目標 Lighthouse 90+）
+．Google Search Console 串接
+．結案報告與後台操作教學
+
+預計 3-4 週完成。
+
+
+【每月維護】NT$ 6,500/月（基準：4 篇文章上架）
+
+．衛教文章 / 公告上架（含 H1/H2 排版、SEO 欄位設定）
+．WordPress 核心 + 外掛定期更新
+．每日備份確認
+．突發錯誤排除（24 小時內回覆）
+
+
+【合作流程】
+
+1. 提供貴診所網站網址 → 我免費做一次 SEO 基礎健檢（2-3 天）
+2. 雙方確認修改清單與時程
+3. 遠端執行升級，每週回報進度
+4. 結案交付，銜接每月維護
+
+
+【付款方式】
+
+一次性升級：50% 開工 / 50% 結案
+每月維護：次月 5 日前收款
+
+以上為參考報價，實際依網站現況微調。希望能有機會進一步討論！
+
+📧 sky22357168@gmail.com
+📞 0921-789-168

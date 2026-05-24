@@ -5,7 +5,6 @@ import com.eform.dto.WorkOrderRequest;
 import com.eform.model.WorkOrder;
 import com.eform.service.WorkOrderService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,10 +12,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/work-orders")
-@RequiredArgsConstructor
+
 public class WorkOrderController {
 
     private final WorkOrderService service;
+
+
+    public WorkOrderController(WorkOrderService service) {
+        this.service = service;
+    }
 
     @PostMapping
     public ApiResponse<WorkOrder> create(@Valid @RequestBody WorkOrderRequest req,

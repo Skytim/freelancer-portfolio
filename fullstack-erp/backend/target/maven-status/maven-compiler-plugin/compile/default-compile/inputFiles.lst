@@ -1,0 +1,13 @@
+/Users/sky22357168/projects/freelancer/website-design/fullstack-erp/backend/src/main/java/com/erp/dto/ApiResponse.java
+/Users/sky22357168/projects/freelancer/website-design/fullstack-erp/backend/src/main/java/com/erp/repository/SalesOrderRepository.java
+/Users/sky22357168/projects/freelancer/website-design/fullstack-erp/backend/src/main/java/com/erp/controller/SalesOrderController.java
+/Users/sky22357168/projects/freelancer/website-design/fullstack-erp/backend/src/main/java/com/erp/controller/ProductController.java
+/Users/sky22357168/projects/freelancer/website-design/fullstack-erp/backend/src/main/java/com/erp/model/PurchaseOrder.java
+/Users/sky22357168/projects/freelancer/website-design/fullstack-erp/backend/src/main/java/com/erp/ErpApplication.java
+/Users/sky22357168/projects/freelancer/website-design/fullstack-erp/backend/src/main/java/com/erp/controller/PurchaseOrderController.java
+/Users/sky22357168/projects/freelancer/website-design/fullstack-erp/backend/src/main/java/com/erp/model/SalesOrder.java
+/Users/sky22357168/projects/freelancer/website-design/fullstack-erp/backend/src/main/java/com/erp/model/Product.java
+/Users/sky22357168/projects/freelancer/website-design/fullstack-erp/backend/src/main/java/com/erp/repository/PurchaseOrderRepository.java
+/Users/sky22357168/projects/freelancer/website-design/fullstack-erp/backend/src/main/java/com/erp/config/SecurityConfig.java
+/Users/sky22357168/projects/freelancer/website-design/fullstack-erp/backend/src/main/java/com/erp/controller/AuthController.java
+/Users/sky22357168/projects/freelancer/website-design/fullstack-erp/backend/src/main/java/com/erp/repository/ProductRepository.java

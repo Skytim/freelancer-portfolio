@@ -6,18 +6,24 @@ import com.eform.dto.AuthRequest;
 import com.eform.dto.AuthResponse;
 import com.eform.repository.UserRepository;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
+
 public class AuthController {
 
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+
+
+    public AuthController(UserRepository userRepo, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+        this.userRepo = userRepo;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+    }
 
     @PostMapping("/login")
     public ApiResponse<AuthResponse> login(@Valid @RequestBody AuthRequest req) {
@@ -27,8 +33,11 @@ public class AuthController {
             return ApiResponse.fail("帳號或密碼錯誤");
         }
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
-        return ApiResponse.ok(new AuthResponse(
-                token, user.getUsername(), user.getDisplayName(), user.getRole().name()
-        ));
+        AuthResponse resp = new AuthResponse();
+        resp.setToken(token);
+        resp.setUsername(user.getUsername());
+        resp.setDisplayName(user.getDisplayName());
+        resp.setRole(user.getRole().name());
+        return ApiResponse.ok(resp);
     }
 }

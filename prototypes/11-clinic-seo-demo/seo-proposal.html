@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEO 技術審查報告書 — 康禾聯合診所</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+  body { font-family: 'Noto Sans TC', sans-serif; color: #1a1a1a; }
+  .page { max-width: 210mm; margin: 0 auto; background: #fff; }
+  @media print {
+    body { background: #fff; }
+    .page { box-shadow: none; margin: 0; max-width: none; }
+    .no-print { display: none; }
+    section { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body class="bg-gray-100 py-8">
+
+<!-- Print button -->
+<div class="max-w-4xl mx-auto mb-6 no-print">
+  <button onclick="window.print()" class="bg-cyan-600 text-white px-6 py-3 rounded-lg text-sm hover:bg-cyan-700 transition-colors shadow-md">
+    🖨️ 列印成 PDF
+  </button>
+  <span class="text-gray-400 text-sm ml-4">建議用 Chrome → 另存為 PDF</span>
+</div>
+
+<div class="page shadow-lg rounded-lg overflow-hidden">
+
+<!-- 封面 -->
+<section class="bg-gradient-to-br from-cyan-700 to-cyan-900 text-white py-24 px-12 text-center">
+  <div class="text-sm tracking-[0.3em] mb-4 opacity-80">SEO 技術審查報告書</div>
+  <h1 class="text-4xl md:text-5xl font-bold mb-4">讓病人在 Google 上<br>找到您的診所</h1>
+  <div class="w-16 h-1 bg-cyan-400 mx-auto my-8"></div>
+  <p class="text-xl opacity-80 mb-2">康禾聯合診所 · WordPress 網站 SEO 優化方案</p>
+  <p class="text-sm opacity-60 mt-8">提案日期：2026 年 5 月</p>
+</section>
+
+<!-- 執行摘要 -->
+<section class="py-12 px-12 border-b">
+  <h2 class="text-2xl font-bold mb-6 text-cyan-800">執行摘要</h2>
+  <p class="text-gray-600 leading-relaxed mb-4">
+    當病人在 Google 搜尋「中壢 診所」「中壢 皮膚科」「中壢 小兒科」時，您的診所網站是否出現在第一頁？
+  </p>
+  <p class="text-gray-600 leading-relaxed">
+    本方案將為康禾聯合診所進行<b>網站 SEO 技術優化 + AI 搜尋引擎友善設定（AIEO）</b>，
+    提升在 Google 搜尋結果中的排名，並讓 ChatGPT、Claude 等 AI 助手正確推薦您的診所。
+    一次性的技術設定，效果長期持續。
+  </p>
+</section>
+
+<!-- 現況分析 -->
+<section class="py-12 px-12 border-b bg-gray-50">
+  <h2 class="text-2xl font-bold mb-6 text-cyan-800">多數診所網站的 SEO 現況問題</h2>
+  <p class="text-gray-500 text-sm mb-6">以下是一般診所網站常見的 SEO 問題。您的診所網站是否也有類似情況？</p>
+
+  <div class="space-y-4">
+    <div class="bg-white rounded-lg p-5 border-l-4 border-red-400">
+      <h3 class="font-semibold text-red-700 mb-1">❌ 沒有結構化資料（Schema.org）</h3>
+      <p class="text-sm text-gray-500">Google 看不懂您的網站內容。無法在搜尋結果中顯示星等評分、營業時間、醫師資訊等「豐富摘要」。</p>
+    </div>
+    <div class="bg-white rounded-lg p-5 border-l-4 border-red-400">
+      <h3 class="font-semibold text-red-700 mb-1">❌ AI 搜尋引擎看不懂您的網站</h3>
+      <p class="text-sm text-gray-500">2026 年，越來越多人用 ChatGPT/Claude 搜尋醫療資訊。沒有 llms.txt 的網站，AI 無法正確理解與推薦。</p>
+    </div>
+    <div class="bg-white rounded-lg p-5 border-l-4 border-amber-400">
+      <h3 class="font-semibold text-amber-700 mb-1">⚠️ 網站速度偏慢</h3>
+      <p class="text-sm text-gray-500">圖片未壓縮、沒有快取機制、未使用 CDN。Google 會將載入速度列入排名因素。</p>
+    </div>
+    <div class="bg-white rounded-lg p-5 border-l-4 border-amber-400">
+      <h3 class="font-semibold text-amber-700 mb-1">⚠️ 缺乏持續更新的內容</h3>
+      <p class="text-sm text-gray-500">網站做好後就不再更新。Google 偏好定期更新內容的網站，衛教文章是醫療網站 SEO 的核心。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 解決方案 -->
+<section class="py-12 px-12 border-b">
+  <h2 class="text-2xl font-bold mb-6 text-cyan-800">我們的解決方案</h2>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="border border-gray-200 rounded-lg p-6">
+      <div class="text-2xl mb-3">🔍</div>
+      <h3 class="font-bold mb-2">Schema.org 結構化資料</h3>
+      <p class="text-sm text-gray-500 leading-relaxed">部署 MedicalClinic、Physician、FAQ、BreadcrumbList 等 JSON-LD 標記，讓 Google 搜尋結果顯示星等、營業時間、科別等豐富資訊。</p>
+      <p class="text-xs text-cyan-600 mt-3">效果：搜尋結果點擊率提升 15-30%</p>
+    </div>
+    <div class="border border-gray-200 rounded-lg p-6">
+      <div class="text-2xl mb-3">🤖</div>
+      <h3 class="font-bold mb-2">AIEO 設定（llms.txt）</h3>
+      <p class="text-sm text-gray-500 leading-relaxed">設定 llms.txt 標準格式，讓 ChatGPT、Claude 等 AI 助手正確理解診所資訊，在 AI 搜尋結果中被優先推薦。</p>
+      <p class="text-xs text-cyan-600 mt-3">效果：AI 搜尋時代的差異化競爭優勢</p>
+    </div>
+    <div class="border border-gray-200 rounded-lg p-6">
+      <div class="text-2xl mb-3">⚡</div>
+      <h3 class="font-bold mb-2">PageSpeed 效能優化</h3>
+      <p class="text-sm text-gray-500 leading-relaxed">圖片延遲載入、靜態資源壓縮、WP 快取設定、CDN 部署。目標：Google Lighthouse 評分 90+。</p>
+      <p class="text-xs text-cyan-600 mt-3">效果：網站載入速度提升 2-3 倍</p>
+    </div>
+    <div class="border border-gray-200 rounded-lg p-6">
+      <div class="text-2xl mb-3">📝</div>
+      <h3 class="font-bold mb-2">SEO 內容策略</h3>
+      <p class="text-sm text-gray-500 leading-relaxed">規劃關鍵字策略、文章架構、內部連結結構。協助建立醫師衛教文章模板，維持長期內容更新。</p>
+      <p class="text-xs text-cyan-600 mt-3">效果：Google 排名持續提升</p>
+    </div>
+  </div>
+</section>
+
+<!-- 技術交付物 -->
+<section class="py-12 px-12 border-b bg-gray-50">
+  <h2 class="text-2xl font-bold mb-6 text-cyan-800">技術交付物</h2>
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="border-b border-gray-300 text-left">
+        <th class="py-3 font-semibold">項目</th>
+        <th class="py-3 font-semibold">說明</th>
+        <th class="py-3 font-semibold">格式</th>
+      </tr>
+    </thead>
+    <tbody class="text-gray-600">
+      <tr class="border-b border-gray-200">
+        <td class="py-3">Schema.org 結構化資料</td>
+        <td class="py-3">MedicalClinic、Physician、FAQ、BreadcrumbList 等完整 JSON-LD</td>
+        <td class="py-3 text-xs font-mono">.json</td>
+      </tr>
+      <tr class="border-b border-gray-200">
+        <td class="py-3">llms.txt 設定檔</td>
+        <td class="py-3">符合 AI Engine Optimization 標準，供 AI 爬蟲讀取網站結構</td>
+        <td class="py-3 text-xs font-mono">.txt</td>
+      </tr>
+      <tr class="border-b border-gray-200">
+        <td class="py-3">robots.txt + Sitemap</td>
+        <td class="py-3">爬蟲規則設定、XML Sitemap 自動產生</td>
+        <td class="py-3 text-xs font-mono">.txt / .xml</td>
+      </tr>
+      <tr class="border-b border-gray-200">
+        <td class="py-3">Meta Tags 模板</td>
+        <td class="py-3">全站頁面的 Title、Description、OG 標籤模板</td>
+        <td class="py-3">WP 後台設定</td>
+      </tr>
+      <tr class="border-b border-gray-200">
+        <td class="py-3">PageSpeed 優化</td>
+        <td class="py-3">圖片壓縮、快取設定、CDN 建議、Lighthouse 報告</td>
+        <td class="py-3">報告 + 設定</td>
+      </tr>
+      <tr>
+        <td class="py-3">網站架構建議</td>
+        <td class="py-3">資訊架構、選單設計、內部連結策略</td>
+        <td class="py-3">文件</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 時程 -->
+<section class="py-12 px-12 border-b">
+  <h2 class="text-2xl font-bold mb-6 text-cyan-800">時程規劃（4 週）</h2>
+  <div class="space-y-4">
+    <div class="flex gap-4 items-start">
+      <div class="bg-cyan-600 text-white text-xs font-bold px-3 py-1 rounded min-w-[3.5rem] text-center">第 1 週</div>
+      <div>
+        <h3 class="font-semibold">網站現況盤點</h3>
+        <p class="text-sm text-gray-500">取得網站後台權限 → 分析現有 SEO 狀態 → Google Search Console 設定 → 關鍵字研究與規劃</p>
+      </div>
+    </div>
+    <div class="flex gap-4 items-start">
+      <div class="bg-cyan-600 text-white text-xs font-bold px-3 py-1 rounded min-w-[3.5rem] text-center">第 2 週</div>
+      <div>
+        <h3 class="font-semibold">技術 SEO 部署</h3>
+        <p class="text-sm text-gray-500">Schema.org JSON-LD 部署 → llms.txt 上線 → robots.txt 設定 → Meta Tags 優化</p>
+      </div>
+    </div>
+    <div class="flex gap-4 items-start">
+      <div class="bg-cyan-600 text-white text-xs font-bold px-3 py-1 rounded min-w-[3.5rem] text-center">第 3 週</div>
+      <div>
+        <h3 class="font-semibold">效能優化 + 內容建立</h3>
+        <p class="text-sm text-gray-500">PageSpeed 優化 → 衛教文章模板建立 → 首批 3 篇文章上架 → 內部連結設定</p>
+      </div>
+    </div>
+    <div class="flex gap-4 items-start">
+      <div class="bg-cyan-600 text-white text-xs font-bold px-3 py-1 rounded min-w-[3.5rem] text-center">第 4 週</div>
+      <div>
+        <h3 class="font-semibold">測試與交接</h3>
+        <p class="text-sm text-gray-500">Google Rich Results 測試 → Lighthouse 報告 → 業主後台操作教學 → 結案報告</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 報價 -->
+<section class="py-12 px-12 bg-gray-50 border-b">
+  <h2 class="text-2xl font-bold mb-6 text-cyan-800">報價</h2>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="bg-white rounded-lg p-6 border border-gray-200">
+      <h3 class="font-bold text-lg mb-4">一次性技術設定</h3>
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between">
+          <span class="text-gray-500">SEO 技術部署（Schema + llms.txt + Meta）</span>
+          <span class="font-medium">NT$ 12,000</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-500">PageSpeed 優化</span>
+          <span class="font-medium">NT$ 5,000</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-500">選單架構重整 + 內容模板設計</span>
+          <span class="font-medium">NT$ 8,000</span>
+        </div>
+        <div class="border-t pt-3 mt-3 flex justify-between font-bold">
+          <span>一次性費用合計</span>
+          <span class="text-cyan-700">NT$ 25,000</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg p-6 border border-gray-200">
+      <h3 class="font-bold text-lg mb-4">持續性維護（可選）</h3>
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between">
+          <span class="text-gray-500">每月文章上架（2 篇）</span>
+          <span class="font-medium">NT$ 3,000/月</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-500">SEO 排名追蹤報告</span>
+          <span class="font-medium">NT$ 2,000/月</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-500">網站技術維護</span>
+          <span class="font-medium">NT$ 1,500/月</span>
+        </div>
+        <div class="border-t pt-3 mt-3 flex justify-between font-bold">
+          <span>每月維護合計</span>
+          <span class="text-cyan-700">NT$ 6,500/月</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-xs text-gray-400 mt-4">※ 以上報價不含 WP 主題購買費用（如需要，約 NT$ 1,500~2,500 一次性）。平台月費（主機、網域）由業主自理。</p>
+</section>
+
+<!-- 聯絡 -->
+<section class="py-16 px-12 text-center bg-cyan-50">
+  <h2 class="text-2xl font-bold mb-4 text-cyan-800">準備好讓更多病人找到您了嗎？</h2>
+  <p class="text-gray-500 mb-6">隨時歡迎聯繫討論，我們可以先為您的網站做一次免費的 SEO 基礎健檢。</p>
+  <div class="text-sm text-gray-600 space-y-1">
+    <p>📧 email@example.com</p>
+    <p>📞 09XX-XXX-XXX</p>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

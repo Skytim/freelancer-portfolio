@@ -6,203 +6,368 @@
 <title>進銷存管理系統 — Prototype Demo</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
 body { font-family: 'Noto Sans TC', sans-serif; background: #f1f5f9; }
-.sidebar { width: 220px; min-height: 100vh; }
-.stat-card { transition: all 0.2s; }
+.sidebar { width: 220px; }
+.nav-active { background: #2563eb; color: #fff; }
+.nav-item { transition: all 0.15s; }
+.nav-item:hover { background: rgba(255,255,255,0.1); }
+.view { display: none; }
+.view.active { display: block; }
+.stat-card { transition: all 0.2s; cursor: pointer; }
 .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; }
+.modal-overlay.hidden { display: none; }
+.row-click { cursor: pointer; }
+.row-click:hover { background: #f8fafc; }
 </style>
 </head>
 <body class="flex">
 
-<!-- Sidebar -->
+<!-- ============ SIDEBAR ============ -->
 <aside class="sidebar bg-slate-800 text-white flex-shrink-0 hidden md:block">
   <div class="px-5 py-6 border-b border-slate-700">
     <h1 class="font-bold text-lg">📦 進銷存系統</h1>
     <p class="text-xs text-slate-400 mt-1">Inventory Management</p>
   </div>
-  <nav class="px-3 py-4 space-y-1 text-sm">
-    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white">📊 儀表板</a>
-    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 transition-colors">📦 商品管理</a>
-    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 transition-colors">📥 進貨單</a>
-    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 transition-colors">📤 出貨單</a>
-    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 transition-colors">🏪 分店管理</a>
-    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 transition-colors">👥 客戶管理</a>
-    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 transition-colors">📋 報表中心</a>
-    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 transition-colors">⚙️ 系統設定</a>
+  <nav class="px-3 py-4 space-y-1 text-sm" id="sidebarNav">
+    <a href="#" data-view="dashboard" class="nav-item nav-active flex items-center gap-3 px-3 py-2.5 rounded-lg">📊 儀表板</a>
+    <a href="#" data-view="products" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300">📦 商品管理</a>
+    <a href="#" data-view="purchase" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300">📥 進貨管理</a>
+    <a href="#" data-view="sales" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300">📤 出貨管理</a>
+    <a href="#" data-view="inventory" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300">📋 庫存查詢</a>
+    <a href="#" data-view="reports" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300">📈 報表中心</a>
   </nav>
 </aside>
 
-<!-- Main -->
+<!-- ============ MAIN ============ -->
 <main class="flex-1 min-h-screen">
 
   <!-- Top Bar -->
   <header class="bg-white px-6 py-4 border-b flex items-center justify-between sticky top-0 z-10">
     <div>
-      <h2 class="font-semibold text-lg">儀表板</h2>
-      <p class="text-xs text-gray-400">最後更新：<span id="updateTime">--</span></p>
+      <h2 class="font-semibold text-lg" id="viewTitle">儀表板</h2>
+      <p class="text-xs text-gray-400" id="viewBreadcrumb">首頁 > 儀表板</p>
     </div>
     <div class="flex items-center gap-4">
-      <input type="text" placeholder="搜尋商品/訂單..." class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-48 focus:outline-none focus:border-blue-400">
+      <span class="text-xs text-gray-400" id="clock">--</span>
       <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">管</div>
     </div>
   </header>
 
   <div class="px-6 py-6">
 
-    <!-- Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white rounded-xl p-5 stat-card cursor-pointer" onclick="alert('本月總銷售額：NT$ 1,847,200')">
-        <p class="text-xs text-gray-400 mb-1">本月營收</p>
-        <p class="text-2xl font-bold text-gray-900">$1,847,200</p>
-        <p class="text-xs text-green-500 mt-1">↑ 12.5% vs 上月</p>
+    <!-- ========== VIEW: Dashboard ========== -->
+    <div id="view-dashboard" class="view active">
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-xl p-5 stat-card">
+          <p class="text-xs text-gray-400 mb-1">本月營收</p>
+          <p class="text-2xl font-bold text-gray-900">$1,847,200</p>
+          <p class="text-xs text-green-500 mt-1">↑ 12.5% vs 上月</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 stat-card">
+          <p class="text-xs text-gray-400 mb-1">庫存品項</p>
+          <p class="text-2xl font-bold text-gray-900">486 <span class="text-sm font-normal text-gray-400">項</span></p>
+          <p class="text-xs text-amber-500 mt-1">⚠ 12 項低於安全庫存</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 stat-card">
+          <p class="text-xs text-gray-400 mb-1">本月交易</p>
+          <p class="text-2xl font-bold text-gray-900">210 <span class="text-sm font-normal text-gray-400">筆</span></p>
+          <p class="text-xs text-gray-400 mt-1">進 23 / 出 187</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 stat-card">
+          <p class="text-xs text-gray-400 mb-1">活躍客戶</p>
+          <p class="text-2xl font-bold text-gray-900">156 <span class="text-sm font-normal text-gray-400">位</span></p>
+          <p class="text-xs text-green-500 mt-1">↑ 23 位新客戶</p>
+        </div>
       </div>
-      <div class="bg-white rounded-xl p-5 stat-card cursor-pointer" onclick="alert('目前庫存品項：486 項\n低庫存警示：12 項')">
-        <p class="text-xs text-gray-400 mb-1">庫存總量</p>
-        <p class="text-2xl font-bold text-gray-900">486 <span class="text-sm font-normal text-gray-400">項</span></p>
-        <p class="text-xs text-amber-500 mt-1">⚠ 12 項低於安全庫存</p>
-      </div>
-      <div class="bg-white rounded-xl p-5 stat-card cursor-pointer" onclick="alert('本月進貨：23 筆\n本月出貨：187 筆')">
-        <p class="text-xs text-gray-400 mb-1">本月訂單</p>
-        <p class="text-2xl font-bold text-gray-900">210 <span class="text-sm font-normal text-gray-400">筆</span></p>
-        <p class="text-xs text-gray-400 mt-1">進 23 / 出 187</p>
-      </div>
-      <div class="bg-white rounded-xl p-5 stat-card cursor-pointer" onclick="alert('活躍客戶：156 位\n本月新增：23 位')">
-        <p class="text-xs text-gray-400 mb-1">活躍客戶</p>
-        <p class="text-2xl font-bold text-gray-900">156 <span class="text-sm font-normal text-gray-400">位</span></p>
-        <p class="text-xs text-green-500 mt-1">↑ 23 位新客戶</p>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="md:col-span-2 bg-white rounded-xl overflow-hidden">
+          <div class="px-5 py-4 border-b"><h3 class="font-semibold">📦 最近交易紀錄</h3></div>
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-gray-500 text-xs">
+              <tr><th class="text-left py-3 px-4">單號</th><th class="text-left py-3 px-4">類型</th><th class="text-left py-3 px-4">商品</th><th class="text-right py-3 px-4">數量</th><th class="text-right py-3 px-4">金額</th><th class="text-center py-3 px-4">狀態</th></tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              <tr class="row-click" onclick="switchView('purchase')"><td class="py-3 px-4 font-mono text-xs">PO-0524-001</td><td class="py-3 px-4"><span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">進貨</span></td><td class="py-3 px-4">工業用軸承 6204</td><td class="py-3 px-4 text-right">50 組</td><td class="py-3 px-4 text-right font-medium">$140,000</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">完成</span></td></tr>
+              <tr class="row-click" onclick="switchView('sales')"><td class="py-3 px-4 font-mono text-xs">SO-0524-087</td><td class="py-3 px-4"><span class="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded">出貨</span></td><td class="py-3 px-4">不鏽鋼螺栓 M8x30</td><td class="py-3 px-4 text-right">200 支</td><td class="py-3 px-4 text-right font-medium">$18,000</td><td class="py-3 px-4 text-center"><span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">處理中</span></td></tr>
+              <tr class="row-click" onclick="switchView('sales')"><td class="py-3 px-4 font-mono text-xs">SO-0523-086</td><td class="py-3 px-4"><span class="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded">出貨</span></td><td class="py-3 px-4">配電盤外殼 600x400</td><td class="py-3 px-4 text-right">12 台</td><td class="py-3 px-4 text-right font-medium">$96,000</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">完成</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="space-y-4">
+          <div class="bg-white rounded-xl p-5">
+            <h3 class="font-semibold text-sm mb-3">⚠️ 低庫存警示</h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between py-1 cursor-pointer hover:text-red-600" onclick="switchView('inventory')"><span>不鏽鋼螺栓 M6</span><span class="text-red-500 font-bold">15</span></div>
+              <div class="flex justify-between py-1 cursor-pointer hover:text-red-600" onclick="switchView('inventory')"><span>密封墊片 DN50</span><span class="text-red-500 font-bold">3</span></div>
+              <div class="flex justify-between py-1 cursor-pointer hover:text-amber-600" onclick="switchView('inventory')"><span>電纜 14AWG</span><span class="text-amber-500 font-bold">45m</span></div>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl p-5">
+            <h3 class="font-semibold text-sm mb-3">🏪 分店庫存</h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between"><span>總店（台北）</span><span class="font-medium">234 項</span></div>
+              <div class="flex justify-between"><span>台中分店</span><span class="font-medium">128 項</span></div>
+              <div class="flex justify-between"><span>高雄分店</span><span class="font-medium">86 項</span></div>
+              <div class="flex justify-between"><span>線上商店</span><span class="font-medium">38 項</span></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Table + Chart -->
-    <div class="grid md:grid-cols-3 gap-6">
-
-      <!-- Inventory Table -->
-      <div class="md:col-span-2 bg-white rounded-xl overflow-hidden">
+    <!-- ========== VIEW: Products ========== -->
+    <div id="view-products" class="view">
+      <div class="bg-white rounded-xl overflow-hidden">
         <div class="px-5 py-4 border-b flex items-center justify-between">
-          <h3 class="font-semibold">📦 近期進出貨紀錄</h3>
-          <div class="flex gap-1">
-            <button class="text-xs px-3 py-1 rounded bg-blue-50 text-blue-600 font-medium">全部</button>
-            <button class="text-xs px-3 py-1 rounded text-gray-400 hover:bg-gray-50" onclick="filterTable('in')">進貨</button>
-            <button class="text-xs px-3 py-1 rounded text-gray-400 hover:bg-gray-50" onclick="filterTable('out')">出貨</button>
+          <div class="flex items-center gap-4">
+            <h3 class="font-semibold">商品列表</h3>
+            <input type="text" placeholder="🔍 搜尋商品名稱或 SKU..." class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-56 focus:outline-none focus:border-blue-400" id="productSearch" oninput="filterProducts()">
           </div>
+          <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700" onclick="showModal('add-product-modal')">＋ 新增商品</button>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-sm" id="invTable">
+          <table class="w-full text-sm">
             <thead class="bg-gray-50 text-gray-500 text-xs">
-              <tr><th class="text-left py-3 px-4">單號</th><th class="text-left py-3 px-4">類型</th><th class="text-left py-3 px-4">商品</th><th class="text-right py-3 px-4">數量</th><th class="text-right py-3 px-4">金額</th><th class="text-left py-3 px-4">日期</th><th class="text-center py-3 px-4">狀態</th></tr>
+              <tr><th class="text-left py-3 px-4">SKU</th><th class="text-left py-3 px-4">商品名稱</th><th class="text-left py-3 px-4">分類</th><th class="text-right py-3 px-4">成本</th><th class="text-right py-3 px-4">售價</th><th class="text-right py-3 px-4">庫存</th><th class="text-center py-3 px-4">狀態</th></tr>
             </thead>
-            <tbody class="divide-y divide-gray-50">
-              <tr class="hover:bg-gray-50 cursor-pointer" onclick="alert('訂單詳情\n單號：PO-2026-0524-001\n商品：工業用軸承 6204\n數量：50 組\n單價：$2,800\n總額：$140,000\n狀態：已完成')">
-                <td class="py-3 px-4 font-mono text-xs">PO-0524-001</td>
-                <td class="py-3 px-4"><span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">進貨</span></td>
-                <td class="py-3 px-4">工業用軸承 6204</td>
-                <td class="py-3 px-4 text-right">50 組</td>
-                <td class="py-3 px-4 text-right font-medium">$140,000</td>
-                <td class="py-3 px-4 text-gray-400">05/24</td>
-                <td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">完成</span></td>
-              </tr>
-              <tr class="hover:bg-gray-50 cursor-pointer">
-                <td class="py-3 px-4 font-mono text-xs">SO-0524-087</td>
-                <td class="py-3 px-4"><span class="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded">出貨</span></td>
-                <td class="py-3 px-4">不鏽鋼螺栓 M8x30</td>
-                <td class="py-3 px-4 text-right">200 支</td>
-                <td class="py-3 px-4 text-right font-medium">$18,000</td>
-                <td class="py-3 px-4 text-gray-400">05/24</td>
-                <td class="py-3 px-4 text-center"><span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">處理中</span></td>
-              </tr>
-              <tr class="hover:bg-gray-50 cursor-pointer">
-                <td class="py-3 px-4 font-mono text-xs">SO-0523-086</td>
-                <td class="py-3 px-4"><span class="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded">出貨</span></td>
-                <td class="py-3 px-4">配電盤外殼 600x400</td>
-                <td class="py-3 px-4 text-right">12 台</td>
-                <td class="py-3 px-4 text-right font-medium">$96,000</td>
-                <td class="py-3 px-4 text-gray-400">05/23</td>
-                <td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">完成</span></td>
-              </tr>
-              <tr class="hover:bg-gray-50 cursor-pointer">
-                <td class="py-3 px-4 font-mono text-xs">PO-0523-002</td>
-                <td class="py-3 px-4"><span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">進貨</span></td>
-                <td class="py-3 px-4">電線電纜 14AWG</td>
-                <td class="py-3 px-4 text-right">5 捲</td>
-                <td class="py-3 px-4 text-right font-medium">$25,000</td>
-                <td class="py-3 px-4 text-gray-400">05/23</td>
-                <td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">完成</span></td>
-              </tr>
-              <tr class="hover:bg-gray-50 cursor-pointer">
-                <td class="py-3 px-4 font-mono text-xs">SO-0522-085</td>
-                <td class="py-3 px-4"><span class="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded">出貨</span></td>
-                <td class="py-3 px-4">LED 照明模組 120cm</td>
-                <td class="py-3 px-4 text-right">30 組</td>
-                <td class="py-3 px-4 text-right font-medium">$45,000</td>
-                <td class="py-3 px-4 text-gray-400">05/22</td>
-                <td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">完成</span></td>
-              </tr>
+            <tbody class="divide-y divide-gray-50" id="productTable">
+              <tr class="row-click" onclick="showModal('product-detail-modal')"><td class="py-3 px-4 font-mono text-xs">BRG-6204</td><td class="py-3 px-4">工業用軸承 6204</td><td class="py-3 px-4 text-xs text-gray-400">機械零件</td><td class="py-3 px-4 text-right">$2,100</td><td class="py-3 px-4 text-right font-medium">$2,800</td><td class="py-3 px-4 text-right">120</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">正常</span></td></tr>
+              <tr class="row-click" onclick="showModal('product-detail-modal')"><td class="py-3 px-4 font-mono text-xs">BLT-M8-SS</td><td class="py-3 px-4">不鏽鋼螺栓 M8x30</td><td class="py-3 px-4 text-xs text-gray-400">緊固件</td><td class="py-3 px-4 text-right">$45</td><td class="py-3 px-4 text-right font-medium">$90</td><td class="py-3 px-4 text-right">850</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">正常</span></td></tr>
+              <tr class="row-click" onclick="showModal('product-detail-modal')"><td class="py-3 px-4 font-mono text-xs">BLT-M6-SS</td><td class="py-3 px-4">不鏽鋼螺栓 M6x20</td><td class="py-3 px-4 text-xs text-gray-400">緊固件</td><td class="py-3 px-4 text-right">$28</td><td class="py-3 px-4 text-right font-medium">$65</td><td class="py-3 px-4 text-right text-red-500 font-bold">15</td><td class="py-3 px-4 text-center"><span class="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded">低庫存</span></td></tr>
+              <tr class="row-click" onclick="showModal('product-detail-modal')"><td class="py-3 px-4 font-mono text-xs">CAB-14AWG</td><td class="py-3 px-4">電線電纜 14AWG</td><td class="py-3 px-4 text-xs text-gray-400">電料</td><td class="py-3 px-4 text-right">$3,500</td><td class="py-3 px-4 text-right font-medium">$5,000</td><td class="py-3 px-4 text-right text-amber-500 font-bold">45</td><td class="py-3 px-4 text-center"><span class="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded">注意</span></td></tr>
+              <tr class="row-click" onclick="showModal('product-detail-modal')"><td class="py-3 px-4 font-mono text-xs">PNL-600</td><td class="py-3 px-4">配電盤外殼 600x400</td><td class="py-3 px-4 text-xs text-gray-400">電料</td><td class="py-3 px-4 text-right">$5,800</td><td class="py-3 px-4 text-right font-medium">$8,000</td><td class="py-3 px-4 text-right">36</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">正常</span></td></tr>
+              <tr class="row-click" onclick="showModal('product-detail-modal')"><td class="py-3 px-4 font-mono text-xs">LED-120</td><td class="py-3 px-4">LED 照明模組 120cm</td><td class="py-3 px-4 text-xs text-gray-400">照明</td><td class="py-3 px-4 text-right">$950</td><td class="py-3 px-4 text-right font-medium">$1,500</td><td class="py-3 px-4 text-right">210</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">正常</span></td></tr>
             </tbody>
           </table>
         </div>
       </div>
+    </div>
 
-      <!-- Side Panel: Low Stock + Quick Actions -->
-      <div class="space-y-4">
-        <!-- Low Stock Alerts -->
-        <div class="bg-white rounded-xl p-5">
-          <h3 class="font-semibold text-sm mb-3">⚠️ 低庫存警示</h3>
-          <div class="space-y-3">
-            <div class="flex justify-between items-center text-sm cursor-pointer hover:bg-red-50 -mx-2 px-2 py-1 rounded" onclick="alert('SKU: BOLT-M6-SS\n目前庫存：15 支\n安全庫存：100 支\n建議：立即進貨')">
-              <span class="text-gray-700">不鏽鋼螺栓 M6</span>
-              <span class="text-red-500 font-bold">15</span>
-            </div>
-            <div class="flex justify-between items-center text-sm cursor-pointer hover:bg-red-50 -mx-2 px-2 py-1 rounded" onclick="alert('SKU: GSKT-DN50\n目前庫存：3 片\n安全庫存：20 片')">
-              <span class="text-gray-700">密封墊片 DN50</span>
-              <span class="text-red-500 font-bold">3</span>
-            </div>
-            <div class="flex justify-between items-center text-sm cursor-pointer hover:bg-amber-50 -mx-2 px-2 py-1 rounded" onclick="alert('SKU: CAB-14AWG\n目前庫存：45m\n安全庫存：100m')">
-              <span class="text-gray-700">電纜 14AWG</span>
-              <span class="text-amber-500 font-bold">45m</span>
-            </div>
+    <!-- ========== VIEW: Purchase Orders ========== -->
+    <div id="view-purchase" class="view">
+      <div class="bg-white rounded-xl overflow-hidden">
+        <div class="px-5 py-4 border-b flex items-center justify-between">
+          <h3 class="font-semibold">進貨單列表</h3>
+          <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700" onclick="showModal('purchase-form-modal')">＋ 新增進貨單</button>
+        </div>
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 text-gray-500 text-xs">
+            <tr><th class="text-left py-3 px-4">單號</th><th class="text-left py-3 px-4">供應商</th><th class="text-right py-3 px-4">品項數</th><th class="text-right py-3 px-4">總金額</th><th class="text-left py-3 px-4">日期</th><th class="text-center py-3 px-4">狀態</th></tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            <tr class="row-click" onclick="showModal('purchase-detail-modal')"><td class="py-3 px-4 font-mono text-xs">PO-0524-001</td><td class="py-3 px-4">永豐工業股份有限公司</td><td class="py-3 px-4 text-right">3</td><td class="py-3 px-4 text-right font-medium">$140,000</td><td class="py-3 px-4 text-gray-400">05/24</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">已入庫</span></td></tr>
+            <tr class="row-click" onclick="showModal('purchase-detail-modal')"><td class="py-3 px-4 font-mono text-xs">PO-0523-002</td><td class="py-3 px-4">台達電纜有限公司</td><td class="py-3 px-4 text-right">2</td><td class="py-3 px-4 text-right font-medium">$25,000</td><td class="py-3 px-4 text-gray-400">05/23</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">已入庫</span></td></tr>
+            <tr class="row-click" onclick="showModal('purchase-detail-modal')"><td class="py-3 px-4 font-mono text-xs">PO-0520-003</td><td class="py-3 px-4">祥成五金行</td><td class="py-3 px-4 text-right">5</td><td class="py-3 px-4 text-right font-medium">$62,500</td><td class="py-3 px-4 text-gray-400">05/20</td><td class="py-3 px-4 text-center"><span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">待收貨</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== VIEW: Sales Orders ========== -->
+    <div id="view-sales" class="view">
+      <div class="bg-white rounded-xl overflow-hidden">
+        <div class="px-5 py-4 border-b flex items-center justify-between">
+          <h3 class="font-semibold">出貨單列表</h3>
+          <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700" onclick="showModal('sales-form-modal')">＋ 新增出貨單</button>
+        </div>
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 text-gray-500 text-xs">
+            <tr><th class="text-left py-3 px-4">單號</th><th class="text-left py-3 px-4">客戶</th><th class="text-right py-3 px-4">品項數</th><th class="text-right py-3 px-4">總金額</th><th class="text-left py-3 px-4">日期</th><th class="text-center py-3 px-4">狀態</th></tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            <tr class="row-click" onclick="showModal('sales-detail-modal')"><td class="py-3 px-4 font-mono text-xs">SO-0524-087</td><td class="py-3 px-4">鑫達機械有限公司</td><td class="py-3 px-4 text-right">4</td><td class="py-3 px-4 text-right font-medium">$18,000</td><td class="py-3 px-4 text-gray-400">05/24</td><td class="py-3 px-4 text-center"><span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">揀貨中</span></td></tr>
+            <tr class="row-click" onclick="showModal('sales-detail-modal')"><td class="py-3 px-4 font-mono text-xs">SO-0523-086</td><td class="py-3 px-4">宏泰電機股份有限公司</td><td class="py-3 px-4 text-right">2</td><td class="py-3 px-4 text-right font-medium">$96,000</td><td class="py-3 px-4 text-gray-400">05/23</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">已出貨</span></td></tr>
+            <tr class="row-click" onclick="showModal('sales-detail-modal')"><td class="py-3 px-4 font-mono text-xs">SO-0522-085</td><td class="py-3 px-4">明光照明科技有限公司</td><td class="py-3 px-4 text-right">3</td><td class="py-3 px-4 text-right font-medium">$45,000</td><td class="py-3 px-4 text-gray-400">05/22</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">已出貨</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== VIEW: Inventory ========== -->
+    <div id="view-inventory" class="view">
+      <div class="bg-white rounded-xl overflow-hidden">
+        <div class="px-5 py-4 border-b flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <h3 class="font-semibold">庫存查詢</h3>
+            <select class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm" onchange="filterInventory(this.value)">
+              <option value="all">全部分店</option><option value="台北">總店（台北）</option><option value="台中">台中分店</option><option value="高雄">高雄分店</option>
+            </select>
+          </div>
+          <span class="text-xs text-gray-400" id="invCount">顯示 6 項</span>
+        </div>
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 text-gray-500 text-xs">
+            <tr><th class="text-left py-3 px-4">SKU</th><th class="text-left py-3 px-4">商品</th><th class="text-left py-3 px-4">分店</th><th class="text-right py-3 px-4">現有庫存</th><th class="text-right py-3 px-4">安全庫存</th><th class="text-center py-3 px-4">狀態</th></tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50" id="inventoryTable">
+            <tr><td class="py-3 px-4 font-mono text-xs">BRG-6204</td><td class="py-3 px-4">工業用軸承 6204</td><td class="py-3 px-4 text-gray-400">台北</td><td class="py-3 px-4 text-right">120</td><td class="py-3 px-4 text-right text-gray-400">50</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">正常</span></td></tr>
+            <tr><td class="py-3 px-4 font-mono text-xs">BLT-M8-SS</td><td class="py-3 px-4">不鏽鋼螺栓 M8x30</td><td class="py-3 px-4 text-gray-400">台北</td><td class="py-3 px-4 text-right">850</td><td class="py-3 px-4 text-right text-gray-400">200</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">正常</span></td></tr>
+            <tr><td class="py-3 px-4 font-mono text-xs">BLT-M6-SS</td><td class="py-3 px-4">不鏽鋼螺栓 M6x20</td><td class="py-3 px-4 text-gray-400">台中</td><td class="py-3 px-4 text-right text-red-500 font-bold">15</td><td class="py-3 px-4 text-right text-gray-400">100</td><td class="py-3 px-4 text-center"><span class="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded">⚠ 低庫存</span></td></tr>
+            <tr><td class="py-3 px-4 font-mono text-xs">CAB-14AWG</td><td class="py-3 px-4">電線電纜 14AWG</td><td class="py-3 px-4 text-gray-400">高雄</td><td class="py-3 px-4 text-right text-amber-500 font-bold">45</td><td class="py-3 px-4 text-right text-gray-400">100</td><td class="py-3 px-4 text-center"><span class="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded">⚠ 注意</span></td></tr>
+            <tr><td class="py-3 px-4 font-mono text-xs">GST-DN50</td><td class="py-3 px-4">密封墊片 DN50</td><td class="py-3 px-4 text-gray-400">台北</td><td class="py-3 px-4 text-right text-red-500 font-bold">3</td><td class="py-3 px-4 text-right text-gray-400">20</td><td class="py-3 px-4 text-center"><span class="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded">⚠ 緊急</span></td></tr>
+            <tr><td class="py-3 px-4 font-mono text-xs">LED-120</td><td class="py-3 px-4">LED 照明模組 120cm</td><td class="py-3 px-4 text-gray-400">台北</td><td class="py-3 px-4 text-right">210</td><td class="py-3 px-4 text-right text-gray-400">50</td><td class="py-3 px-4 text-center"><span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">正常</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== VIEW: Reports ========== -->
+    <div id="view-reports" class="view">
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl p-6">
+          <h3 class="font-semibold mb-4">📈 月度銷售趨勢（模擬）</h3>
+          <div class="h-48 bg-gray-50 rounded-lg flex items-end gap-2 px-4 pb-4">
+            <div class="flex-1 bg-blue-500 rounded-t" style="height:60%"></div>
+            <div class="flex-1 bg-blue-500 rounded-t" style="height:75%"></div>
+            <div class="flex-1 bg-blue-500 rounded-t" style="height:55%"></div>
+            <div class="flex-1 bg-blue-500 rounded-t" style="height:90%"></div>
+            <div class="flex-1 bg-blue-500 rounded-t" style="height:85%"></div>
+            <div class="flex-1 bg-blue-600 rounded-t" style="height:100%"></div>
+          </div>
+          <div class="flex justify-between text-xs text-gray-400 mt-2 px-4">
+            <span>12月</span><span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span>
           </div>
         </div>
-
-        <!-- Quick Actions -->
-        <div class="bg-white rounded-xl p-5">
-          <h3 class="font-semibold text-sm mb-3">⚡ 快速操作</h3>
-          <div class="space-y-2">
-            <button class="w-full text-left text-sm px-4 py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors" onclick="alert('➕ 新增進貨單\n\n供應商：\n商品：\n數量：\n單價：')">📥 新增進貨單</button>
-            <button class="w-full text-left text-sm px-4 py-2.5 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors" onclick="alert('📤 新增出貨單\n\n客戶：\n商品：\n數量：')">📤 新增出貨單</button>
-            <button class="w-full text-left text-sm px-4 py-2.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors" onclick="alert('📋 產生報表\n\n選擇報表類型：\n- 庫存彙總表\n- 進出貨明細\n- 銷售分析')">📋 產生報表</button>
-          </div>
-        </div>
-
-        <!-- Multi-branch -->
-        <div class="bg-white rounded-xl p-5">
-          <h3 class="font-semibold text-sm mb-3">🏪 分店庫存概覽</h3>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded"><span>總店（台北）</span><span class="font-medium">234 項</span></div>
-            <div class="flex justify-between cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded"><span>台中分店</span><span class="font-medium">128 項</span></div>
-            <div class="flex justify-between cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded"><span>高雄分店</span><span class="font-medium">86 項</span></div>
-            <div class="flex justify-between cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded"><span>線上商店</span><span class="font-medium">38 項</span></div>
+        <div class="bg-white rounded-xl p-6">
+          <h3 class="font-semibold mb-4">🏷️ 熱門商品 TOP 5</h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between items-center"><span>1. 不鏽鋼螺栓 M8x30</span><span class="font-medium">$180,000</span></div>
+            <div class="flex justify-between items-center"><span>2. LED 照明模組 120cm</span><span class="font-medium">$157,500</span></div>
+            <div class="flex justify-between items-center"><span>3. 工業用軸承 6204</span><span class="font-medium">$140,000</span></div>
+            <div class="flex justify-between items-center"><span>4. 配電盤外殼 600x400</span><span class="font-medium">$96,000</span></div>
+            <div class="flex justify-between items-center"><span>5. 電線電纜 14AWG</span><span class="font-medium">$75,000</span></div>
           </div>
         </div>
       </div>
     </div>
+
   </div>
 </main>
 
+<!-- ============ MODALS ============ -->
+
+<!-- Product Detail Modal -->
+<div id="product-detail-modal" class="modal-overlay hidden" onclick="hideModal('product-detail-modal')">
+  <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4" onclick="event.stopPropagation()">
+    <div class="flex justify-between items-start mb-4">
+      <h3 class="font-bold text-lg">商品詳情</h3>
+      <button class="text-gray-400 hover:text-gray-600" onclick="hideModal('product-detail-modal')">✕</button>
+    </div>
+    <div class="space-y-3 text-sm">
+      <div class="grid grid-cols-2 gap-2"><span class="text-gray-400">SKU</span><span class="font-mono">BRG-6204</span></div>
+      <div class="grid grid-cols-2 gap-2"><span class="text-gray-400">商品名稱</span><span>工業用軸承 6204</span></div>
+      <div class="grid grid-cols-2 gap-2"><span class="text-gray-400">分類</span><span>機械零件</span></div>
+      <div class="grid grid-cols-2 gap-2"><span class="text-gray-400">成本</span><span class="text-gray-500">$2,100</span></div>
+      <div class="grid grid-cols-2 gap-2"><span class="text-gray-400">售價</span><span class="font-medium">$2,800</span></div>
+      <div class="grid grid-cols-2 gap-2"><span class="text-gray-400">現有庫存</span><span>120 組</span></div>
+      <div class="grid grid-cols-2 gap-2"><span class="text-gray-400">安全庫存</span><span>50 組</span></div>
+      <div class="grid grid-cols-2 gap-2"><span class="text-gray-400">最後進貨</span><span>2026-05-24</span></div>
+    </div>
+    <div class="flex gap-3 mt-6">
+      <button class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm" onclick="hideModal('product-detail-modal')">編輯商品</button>
+      <button class="flex-1 border border-gray-200 py-2 rounded-lg text-sm" onclick="hideModal('product-detail-modal')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- Purchase Form Modal -->
+<div id="purchase-form-modal" class="modal-overlay hidden" onclick="hideModal('purchase-form-modal')">
+  <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4" onclick="event.stopPropagation()">
+    <div class="flex justify-between items-start mb-4">
+      <h3 class="font-bold text-lg">新增進貨單</h3>
+      <button class="text-gray-400 hover:text-gray-600" onclick="hideModal('purchase-form-modal')">✕</button>
+    </div>
+    <div class="space-y-4 text-sm">
+      <div><label class="block font-medium mb-1">供應商</label><select class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white"><option>永豐工業股份有限公司</option><option>台達電纜有限公司</option><option>祥成五金行</option></select></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="block font-medium mb-1">商品</label><select class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white"><option>工業用軸承 6204</option><option>不鏽鋼螺栓 M8x30</option><option>電線電纜 14AWG</option></select></div>
+        <div><label class="block font-medium mb-1">數量</label><input type="number" class="w-full border border-gray-200 rounded-lg px-3 py-2" placeholder="0" value="50"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="block font-medium mb-1">單價</label><input type="number" class="w-full border border-gray-200 rounded-lg px-3 py-2" placeholder="0" value="2100"></div>
+        <div><label class="block font-medium mb-1">入庫分店</label><select class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white"><option>總店（台北）</option><option>台中分店</option><option>高雄分店</option></select></div>
+      </div>
+      <div><label class="block font-medium mb-1">備註</label><textarea class="w-full border border-gray-200 rounded-lg px-3 py-2" rows="2"></textarea></div>
+    </div>
+    <div class="flex gap-3 mt-6">
+      <button class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm" onclick="hideModal('purchase-form-modal');alert('✅ 進貨單已建立！\n單號：PO-0525-004\n供應商：永豐工業\n金額：$105,000')">確認建立</button>
+      <button class="flex-1 border border-gray-200 py-2 rounded-lg text-sm" onclick="hideModal('purchase-form-modal')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sales Form Modal -->
+<div id="sales-form-modal" class="modal-overlay hidden" onclick="hideModal('sales-form-modal')">
+  <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4" onclick="event.stopPropagation()">
+    <div class="flex justify-between items-start mb-4">
+      <h3 class="font-bold text-lg">新增出貨單</h3>
+      <button class="text-gray-400 hover:text-gray-600" onclick="hideModal('sales-form-modal')">✕</button>
+    </div>
+    <div class="space-y-4 text-sm">
+      <div><label class="block font-medium mb-1">客戶</label><select class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white"><option>鑫達機械有限公司</option><option>宏泰電機股份有限公司</option><option>明光照明科技有限公司</option></select></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="block font-medium mb-1">商品</label><select class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white"><option>不鏽鋼螺栓 M8x30</option><option>LED 照明模組 120cm</option><option>工業用軸承 6204</option></select></div>
+        <div><label class="block font-medium mb-1">數量</label><input type="number" class="w-full border border-gray-200 rounded-lg px-3 py-2" placeholder="0" value="200"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="block font-medium mb-1">售價</label><input type="number" class="w-full border border-gray-200 rounded-lg px-3 py-2" placeholder="0" value="90"></div>
+        <div><label class="block font-medium mb-1">出貨分店</label><select class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white"><option>總店（台北）</option><option>台中分店</option><option>高雄分店</option></select></div>
+      </div>
+      <div><label class="block font-medium mb-1">備註</label><textarea class="w-full border border-gray-200 rounded-lg px-3 py-2" rows="2"></textarea></div>
+    </div>
+    <div class="flex gap-3 mt-6">
+      <button class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm" onclick="hideModal('sales-form-modal');alert('✅ 出貨單已建立！\n單號：SO-0525-088\n客戶：鑫達機械\n金額：$18,000')">確認建立</button>
+      <button class="flex-1 border border-gray-200 py-2 rounded-lg text-sm" onclick="hideModal('sales-form-modal')">取消</button>
+    </div>
+  </div>
+</div>
+
 <script>
-document.getElementById('updateTime').textContent = new Date().toLocaleString('zh-TW');
-function filterTable(type) {
-  const rows = document.querySelectorAll('#invTable tbody tr');
-  rows.forEach(r => {
-    const t = r.querySelector('td:nth-child(2)').textContent.trim();
-    if (type === 'in') r.style.display = t.includes('進貨') ? '' : 'none';
-    else if (type === 'out') r.style.display = t.includes('出貨') ? '' : 'none';
-    else r.style.display = '';
+// ─── 視圖切換 ───
+const views = ['dashboard','products','purchase','sales','inventory','reports'];
+function switchView(name) {
+  views.forEach(v => document.getElementById('view-'+v).classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  // Update sidebar
+  document.querySelectorAll('#sidebarNav a').forEach(a => {
+    a.classList.remove('nav-active','text-slate-300');
+    a.classList.add('text-slate-300');
+    if (a.dataset.view === name) { a.classList.add('nav-active'); a.classList.remove('text-slate-300'); }
+  });
+  // Update header
+  const titles = {dashboard:'儀表板',products:'商品管理',purchase:'進貨管理',sales:'出貨管理',inventory:'庫存查詢',reports:'報表中心'};
+  document.getElementById('viewTitle').textContent = titles[name];
+  document.getElementById('viewBreadcrumb').textContent = '首頁 > ' + titles[name];
+}
+
+// ─── Sidebar click ───
+document.querySelectorAll('#sidebarNav a').forEach(a => {
+  a.addEventListener('click', e => { e.preventDefault(); switchView(a.dataset.view); });
+});
+
+// ─── Modal ───
+function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+// ─── Product Search ───
+function filterProducts() {
+  const q = document.getElementById('productSearch').value.toLowerCase();
+  document.querySelectorAll('#productTable tr').forEach(r => {
+    r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
   });
 }
-console.log('📦 ERP 進銷存系統 prototype');
-console.log('技術棧建議：React + PostgreSQL + Prisma + Tailwind');
-console.log('核心模組：商品管理、進貨、出貨、庫存、分店、客戶、報表');
+
+// ─── Clock ───
+setInterval(() => {
+  document.getElementById('clock').textContent = new Date().toLocaleString('zh-TW');
+}, 1000);
+
+console.log('📦 ERP 進銷存系統 prototype — 6 個可切換視圖');
+console.log('技術棧建議：React 18 + PostgreSQL + Prisma + Tailwind + Recharts');
 </script>
 </body>
 </html>

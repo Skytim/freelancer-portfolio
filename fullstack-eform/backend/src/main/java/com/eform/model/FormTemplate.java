@@ -1,11 +1,8 @@
 package com.eform.model;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 @Entity
 @Table(name = "form_templates")
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class FormTemplate {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,4 +17,16 @@ public class FormTemplate {
 
     @Column(columnDefinition = "TEXT")
     private String fieldsJson; // JSON Schema for form fields
+
+    public FormTemplate() {}
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getTemplateKey() { return templateKey; }
+    public void setTemplateKey(String templateKey) { this.templateKey = templateKey; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getEquipmentType() { return equipmentType; }
+    public void setEquipmentType(String equipmentType) { this.equipmentType = equipmentType; }
+    public String getFieldsJson() { return fieldsJson; }
+    public void setFieldsJson(String fieldsJson) { this.fieldsJson = fieldsJson; }
 }
