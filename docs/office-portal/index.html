@@ -8,7 +8,7 @@
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;background:#f3f4f6;color:#1f2937;display:flex;min-height:100vh}
 nav{width:220px;background:#1e293b;color:#cbd5e1;font-size:14px;flex-shrink:0}
 nav .brand{padding:20px;font-size:16px;font-weight:700;color:#fff;border-bottom:1px solid #334155}
-nav a{display:flex;align-items:center;gap:10px;padding:12px 20px;color:#94a3b8;text-decoration:none;transition:all .15s}
+nav a{display:flex;align-items:center;gap:10px;padding:12px 20px;color:#94a3b8;text-decoration:none;transition:all .15s;cursor:pointer}
 nav a:hover,nav a.active{color:#fff;background:#334155}
 nav a.active{border-left:3px solid #3b82f6}
 main{flex:1;padding:24px 32px;overflow-y:auto}
@@ -23,6 +23,7 @@ h1{font-size:22px;font-weight:700;margin-bottom:20px}
 .badge-blue{background:#dbeafe;color:#1d4ed8}
 .badge-green{background:#dcfce7;color:#16a34a}
 .badge-amber{background:#fef3c7;color:#d97706}
+.badge-red{background:#fee2e2;color:#dc2626}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;padding:10px 12px;background:#f9fafb;color:#6b7280;font-weight:500;border-bottom:1px solid #e5e7eb}
 td{padding:10px 12px;border-bottom:1px solid #f3f4f6}
@@ -32,7 +33,26 @@ td{padding:10px 12px;border-bottom:1px solid #f3f4f6}
 .announcement:hover{background:#f1f5f9}
 .announcement .title{font-weight:600;font-size:14px}
 .announcement .date{font-size:12px;color:#9ca3af}
-@media(max-width:768px){body{flex-direction:column}nav{width:100%}nav .links{display:flex;overflow-x:auto}nav a{white-space:nowrap}main{padding:16px}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:flex;align-items:center;justify-content:center}
+.modal-overlay.hidden{display:none}
+.modal{background:#fff;border-radius:12px;padding:24px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal h3{font-size:18px;font-weight:700;margin-bottom:16px}
+.modal label{display:block;font-size:13px;font-weight:500;color:#4b5563;margin-bottom:4px}
+.modal input,.modal select,.modal textarea{width:100%;border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:13px;margin-bottom:12px}
+.modal textarea{resize:vertical;min-height:80px}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.btn{padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:none}
+.btn-primary{background:#3b82f6;color:#fff}
+.btn-primary:hover{background:#2563eb}
+.btn-secondary{background:#fff;color:#4b5563;border:1px solid #d1d5db}
+.btn-secondary:hover{background:#f9fafb}
+.btn-danger{background:#ef4444;color:#fff}
+.btn-success{background:#10b981;color:#fff}
+.btn-sm{padding:4px 10px;font-size:12px}
+.row-click{cursor:pointer}
+.row-click:hover{background:#f9fafb}
+input[type=search]{border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:13px;width:240px;margin-bottom:16px}
+@media(max-width:768px){body{flex-direction:column}nav{width:100%}nav .links{display:flex;overflow-x:auto}nav a{white-space:nowrap;font-size:12px;padding:10px 14px}main{padding:16px}}
 </style>
 </head>
 <body>
@@ -49,127 +69,260 @@ td{padding:10px 12px;border-bottom:1px solid #f3f4f6}
 </nav>
 
 <main>
-  <!-- DASHBOARD -->
+  <!-- ===== DASHBOARD ===== -->
   <div id="view-dashboard" class="view active">
-    <h1>早安，王小明</h1>
+    <h1>早安，林柏翰</h1>
     <div class="grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px">
-      <div class="card"><div class="stat">12</div><div class="stat-label">待辦工作</div></div>
-      <div class="card"><div class="stat">3</div><div class="stat-label" style="color:#d97706">待簽核</div></div>
-      <div class="card"><div class="stat">47</div><div class="stat-label">公司文件</div></div>
-      <div class="card"><div class="stat">28</div><div class="stat-label">在職員工</div></div>
+      <div class="card" onclick="switchTab('tasks')" style="cursor:pointer"><div class="stat">12</div><div class="stat-label">待辦工作</div></div>
+      <div class="card" onclick="switchTab('approvals')" style="cursor:pointer"><div class="stat">3</div><div class="stat-label" style="color:#d97706">待簽核</div></div>
+      <div class="card" onclick="switchTab('docs')" style="cursor:pointer"><div class="stat">47</div><div class="stat-label">公司文件</div></div>
+      <div class="card" onclick="switchTab('employees')" style="cursor:pointer"><div class="stat">28</div><div class="stat-label">在職員工</div></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <div class="card"><h3>📢 最新公告</h3>
-        <div class="announcement"><div class="title">5/26 全體會議 — Q2 業績檢討</div><div class="date">管理部 · 2026-05-24</div></div>
-        <div class="announcement"><div class="title">辦公室冷氣維護通知（5/28 09:00-12:00）</div><div class="date">總務課 · 2026-05-23</div></div>
-        <div class="announcement"><div class="title">新版請假系統上線公告</div><div class="date">資訊課 · 2026-05-20</div></div>
+        <div class="announcement" onclick="showModal('announcement-modal')"><div class="title">5/26 全體會議 — Q2 業績檢討</div><div class="date">管理部 · 2026-05-24</div></div>
+        <div class="announcement" onclick="showModal('announcement-modal')"><div class="title">辦公室冷氣維護通知（5/28 09:00-12:00）</div><div class="date">總務課 · 2026-05-23</div></div>
+        <div class="announcement" onclick="showModal('announcement-modal')"><div class="title">新版請假系統上線公告</div><div class="date">資訊課 · 2026-05-20</div></div>
       </div>
       <div class="card"><h3>📋 我的待辦</h3>
         <table><tbody>
-          <tr><td><span class="badge badge-amber">緊急</span></td><td>客戶 A 出貨單審核</td><td style="color:#9ca3af">今日</td></tr>
-          <tr><td><span class="badge badge-blue">一般</span></td><td>更新供應商報價表</td><td style="color:#9ca3af">5/26</td></tr>
-          <tr><td><span class="badge badge-blue">一般</span></td><td>月報表彙整上傳</td><td style="color:#9ca3af">5/30</td></tr>
+          <tr class="row-click" onclick="switchTab('tasks')"><td><span class="badge badge-amber">緊急</span></td><td>客戶 A 出貨單審核</td><td style="color:#9ca3af">今日</td></tr>
+          <tr class="row-click" onclick="switchTab('tasks')"><td><span class="badge badge-blue">一般</span></td><td>更新供應商報價表</td><td style="color:#9ca3af">5/26</td></tr>
+          <tr class="row-click" onclick="switchTab('tasks')"><td><span class="badge badge-blue">一般</span></td><td>月報表彙整上傳</td><td style="color:#9ca3af">5/30</td></tr>
           <tr><td><span class="badge badge-green">完成</span></td><td><s>設備盤點表</s></td><td style="color:#9ca3af">5/23</td></tr>
         </tbody></table>
       </div>
     </div>
   </div>
 
-  <!-- TASKS -->
+  <!-- ===== TASKS ===== -->
   <div id="view-tasks" class="view">
     <h1>📋 工作管理</h1>
-    <div style="display:flex;gap:12px;margin-bottom:20px">
-      <select style="border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:13px">
-        <option>全部狀態</option><option>待處理</option><option>進行中</option><option>已完成</option>
-      </select>
-      <input type="text" placeholder="搜尋工作..." style="border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:13px;flex:1">
-      <button style="background:#3b82f6;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer">＋ 新增工作</button>
+    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+      <select style="border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:13px"><option>全部狀態</option><option>待處理</option><option>進行中</option><option>已完成</option></select>
+      <input type="search" placeholder="搜尋工作..." style="border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:13px;flex:1;min-width:160px">
+      <button class="btn btn-primary" onclick="showModal('task-modal')">＋ 新增工作</button>
     </div>
     <div class="card" style="padding:0">
       <table>
-        <thead><tr><th>狀態</th><th>工作內容</th><th>負責人</th><th>期限</th><th>進度</th></tr></thead>
+        <thead><tr><th>狀態</th><th>工作內容</th><th>負責人</th><th>期限</th><th>進度</th><th>操作</th></tr></thead>
         <tbody>
-          <tr><td><span class="badge badge-amber">待處理</span></td><td>客戶 A 出貨單審核</td><td>王小明</td><td>05/25</td><td>0%</td></tr>
-          <tr><td><span class="badge badge-blue">進行中</span></td><td>供應商報價更新</td><td>李小華</td><td>05/26</td><td>60%</td></tr>
-          <tr><td><span class="badge badge-blue">進行中</span></td><td>Q2 報表彙整</td><td>王小明</td><td>05/30</td><td>30%</td></tr>
-          <tr><td><span class="badge badge-green">已完成</span></td><td>設備盤點表</td><td>張大為</td><td>05/23</td><td>100%</td></tr>
-          <tr><td><span class="badge badge-green">已完成</span></td><td>請假系統測試</td><td>李小華</td><td>05/22</td><td>100%</td></tr>
+          <tr class="row-click"><td><span class="badge badge-amber">待處理</span></td><td>客戶 A 出貨單審核</td><td>林柏翰</td><td>05/25</td><td>0%</td><td><button class="btn btn-sm btn-primary" onclick="event.stopPropagation();switchTab('approvals')">前往簽核</button></td></tr>
+          <tr class="row-click"><td><span class="badge badge-blue">進行中</span></td><td>供應商報價更新</td><td>郭雅文</td><td>05/26</td><td>60%</td><td><button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();showModal('task-modal')">檢視</button></td></tr>
+          <tr class="row-click"><td><span class="badge badge-blue">進行中</span></td><td>Q2 報表彙整</td><td>林柏翰</td><td>05/30</td><td>30%</td><td><button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();showModal('task-modal')">檢視</button></td></tr>
+          <tr class="row-click"><td><span class="badge badge-green">已完成</span></td><td>設備盤點表</td><td>黃志誠</td><td>05/23</td><td>100%</td><td><button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();showModal('task-modal')">檢視</button></td></tr>
+          <tr class="row-click"><td><span class="badge badge-green">已完成</span></td><td>請假系統測試</td><td>郭雅文</td><td>05/22</td><td>100%</td><td><button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();showModal('task-modal')">檢視</button></td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- DOCUMENTS -->
+  <!-- ===== DOCUMENTS ===== -->
   <div id="view-docs" class="view">
     <h1>📁 文件庫</h1>
-    <div style="display:flex;gap:12px;margin-bottom:20px">
-      <button style="background:#3b82f6;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer">＋ 上傳文件</button>
-      <button style="background:#fff;border:1px solid #d1d5db;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer">📁 新增資料夾</button>
+    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="showModal('upload-modal')">＋ 上傳文件</button>
+      <button class="btn btn-secondary" onclick="showModal('folder-modal')">📁 新增資料夾</button>
+      <input type="search" placeholder="搜尋文件..." style="border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:13px;flex:1;min-width:160px">
     </div>
     <div class="grid">
-      <div class="card" style="cursor:pointer"><h3>📂 管理辦法</h3><p>12 個檔案 · 更新於 5/20</p></div>
-      <div class="card" style="cursor:pointer"><h3>📂 技術文件</h3><p>8 個檔案 · 更新於 5/18</p></div>
-      <div class="card" style="cursor:pointer"><h3>📂 人事行政</h3><p>15 個檔案 · 更新於 5/22</p></div>
-      <div class="card" style="cursor:pointer"><h3>📂 財務報表</h3><p>6 個檔案 · 更新於 5/15</p></div>
-      <div class="card" style="cursor:pointer"><h3>📂 專案文件</h3><p>23 個檔案 · 更新於 5/24</p></div>
-      <div class="card" style="cursor:pointer"><h3>📂 教育訓練</h3><p>9 個檔案 · 更新於 5/10</p></div>
+      <div class="card" style="cursor:pointer" onclick="showModal('folder-detail-modal')"><h3>📂 管理辦法</h3><p>12 個檔案 · 更新於 5/20</p></div>
+      <div class="card" style="cursor:pointer" onclick="showModal('folder-detail-modal')"><h3>📂 技術文件</h3><p>8 個檔案 · 更新於 5/18</p></div>
+      <div class="card" style="cursor:pointer" onclick="showModal('folder-detail-modal')"><h3>📂 人事行政</h3><p>15 個檔案 · 更新於 5/22</p></div>
+      <div class="card" style="cursor:pointer" onclick="showModal('folder-detail-modal')"><h3>📂 財務報表</h3><p>6 個檔案 · 更新於 5/15</p></div>
+      <div class="card" style="cursor:pointer" onclick="showModal('folder-detail-modal')"><h3>📂 專案文件</h3><p>23 個檔案 · 更新於 5/24</p></div>
+      <div class="card" style="cursor:pointer" onclick="showModal('folder-detail-modal')"><h3>📂 教育訓練</h3><p>9 個檔案 · 更新於 5/10</p></div>
     </div>
   </div>
 
-  <!-- EMPLOYEES -->
+  <!-- ===== EMPLOYEES ===== -->
   <div id="view-employees" class="view">
     <h1>👥 員工通訊錄</h1>
-    <input type="text" placeholder="搜尋姓名或部門..." style="border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:13px;width:240px;margin-bottom:16px">
+    <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+      <input type="search" placeholder="搜尋姓名或部門..." style="border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:13px;width:240px">
+      <select style="border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;font-size:13px"><option>全部部門</option><option>資訊課</option><option>業務部</option><option>管理部</option><option>財務部</option><option>總務課</option></select>
+      <button class="btn btn-primary" onclick="showModal('employee-modal')" style="margin-left:auto">＋ 新增員工</button>
+    </div>
     <div class="card" style="padding:0">
       <table>
-        <thead><tr><th>姓名</th><th>部門</th><th>職稱</th><th>分機</th><th>Email</th></tr></thead>
+        <thead><tr><th>姓名</th><th>部門</th><th>職稱</th><th>分機</th><th>Email</th><th>操作</th></tr></thead>
         <tbody>
-          <tr><td>王小明</td><td>資訊課</td><td>工程師</td><td>#201</td><td>wang@company.tw</td></tr>
-          <tr><td>李小華</td><td>資訊課</td><td>課長</td><td>#202</td><td>lee@company.tw</td></tr>
-          <tr><td>張大為</td><td>業務部</td><td>經理</td><td>#301</td><td>chang@company.tw</td></tr>
-          <tr><td>陳美玲</td><td>管理部</td><td>專員</td><td>#101</td><td>chen@company.tw</td></tr>
-          <tr><td>林建宏</td><td>財務部</td><td>主任</td><td>#401</td><td>lin@company.tw</td></tr>
-          <tr><td>黃詩婷</td><td>業務部</td><td>業務</td><td>#302</td><td>huang@company.tw</td></tr>
-          <tr><td>周志偉</td><td>總務課</td><td>專員</td><td>#501</td><td>chou@company.tw</td></tr>
+          <tr><td>林柏翰</td><td>資訊課</td><td>資深工程師</td><td>#201</td><td>lin.ph@company.tw</td><td><button class="btn btn-sm btn-secondary" onclick="showModal('employee-modal')">檢視</button></td></tr>
+          <tr><td>郭雅文</td><td>資訊課</td><td>課長</td><td>#202</td><td>kuo.yw@company.tw</td><td><button class="btn btn-sm btn-secondary" onclick="showModal('employee-modal')">檢視</button></td></tr>
+          <tr><td>黃志誠</td><td>業務部</td><td>業務經理</td><td>#301</td><td>huang.cc@company.tw</td><td><button class="btn btn-sm btn-secondary" onclick="showModal('employee-modal')">檢視</button></td></tr>
+          <tr><td>陳靜怡</td><td>管理部</td><td>人資專員</td><td>#101</td><td>chen.jy@company.tw</td><td><button class="btn btn-sm btn-secondary" onclick="showModal('employee-modal')">檢視</button></td></tr>
+          <tr><td>許建宏</td><td>財務部</td><td>財務主任</td><td>#401</td><td>hsu.ch@company.tw</td><td><button class="btn btn-sm btn-secondary" onclick="showModal('employee-modal')">檢視</button></td></tr>
+          <tr><td>趙詩涵</td><td>業務部</td><td>業務專員</td><td>#302</td><td>chao.sh@company.tw</td><td><button class="btn btn-sm btn-secondary" onclick="showModal('employee-modal')">檢視</button></td></tr>
+          <tr><td>周志豪</td><td>總務課</td><td>總務專員</td><td>#501</td><td>chou.zh@company.tw</td><td><button class="btn btn-sm btn-secondary" onclick="showModal('employee-modal')">檢視</button></td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- APPROVALS -->
+  <!-- ===== APPROVALS ===== -->
   <div id="view-approvals" class="view">
     <h1>✅ 簽核流程</h1>
-    <div style="display:flex;gap:12px;margin-bottom:20px">
-      <button style="background:#3b82f6;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer">待我簽核 (3)</button>
-      <button style="background:#fff;border:1px solid #d1d5db;border-radius:6px;padding:8px 16px;font-size:13px">我提出的</button>
-      <button style="background:#fff;border:1px solid #d1d5db;border-radius:6px;padding:8px 16px;font-size:13px">已完成</button>
-      <button style="background:#10b981;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;margin-left:auto">＋ 提出簽核</button>
+    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+      <button class="btn btn-primary">待我簽核 (3)</button>
+      <button class="btn btn-secondary">我提出的</button>
+      <button class="btn btn-secondary">已完成</button>
+      <button class="btn btn-success" onclick="showModal('approval-modal')" style="margin-left:auto">＋ 提出簽核</button>
     </div>
     <div class="card" style="padding:0">
       <table>
-        <thead><tr><th>類型</th><th>主旨</th><th>申請人</th><th>日期</th><th>狀態</th></tr></thead>
+        <thead><tr><th>類型</th><th>主旨</th><th>申請人</th><th>日期</th><th>狀態</th><th>操作</th></tr></thead>
         <tbody>
-          <tr style="cursor:pointer"><td>請假單</td><td>5/28 特休申請</td><td>陳美玲</td><td>05/24</td><td><span class="badge badge-amber">待簽核</span></td></tr>
-          <tr style="cursor:pointer"><td>採購單</td><td>辦公設備採購 — 筆電 × 3</td><td>李小華</td><td>05/23</td><td><span class="badge badge-amber">待簽核</span></td></tr>
-          <tr style="cursor:pointer"><td>出差單</td><td>6/1-6/3 台北出差</td><td>張大為</td><td>05/22</td><td><span class="badge badge-amber">待簽核</span></td></tr>
-          <tr style="cursor:pointer"><td>加班單</td><td>5/20 加班 3 小時</td><td>林建宏</td><td>05/21</td><td><span class="badge badge-green">已核准</span></td></tr>
-          <tr style="cursor:pointer"><td>請假單</td><td>5/19 病假</td><td>周志偉</td><td>05/19</td><td><span class="badge badge-green">已核准</span></td></tr>
+          <tr class="row-click"><td>請假單</td><td>5/28 特休申請</td><td>陳靜怡</td><td>05/24</td><td><span class="badge badge-amber">待簽核</span></td><td><button class="btn btn-sm btn-success" onclick="event.stopPropagation();approve(this)">核准</button> <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();reject(this)">退回</button></td></tr>
+          <tr class="row-click"><td>採購單</td><td>辦公設備採購 — 筆電 × 3</td><td>郭雅文</td><td>05/23</td><td><span class="badge badge-amber">待簽核</span></td><td><button class="btn btn-sm btn-success" onclick="event.stopPropagation();approve(this)">核准</button> <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();reject(this)">退回</button></td></tr>
+          <tr class="row-click"><td>出差單</td><td>6/1-6/3 台北出差</td><td>黃志誠</td><td>05/22</td><td><span class="badge badge-amber">待簽核</span></td><td><button class="btn btn-sm btn-success" onclick="event.stopPropagation();approve(this)">核准</button> <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();reject(this)">退回</button></td></tr>
+          <tr class="row-click"><td>加班單</td><td>5/20 加班 3 小時</td><td>許建宏</td><td>05/21</td><td><span class="badge badge-green">已核准</span></td><td><span style="color:#9ca3af;font-size:12px">林柏翰 · 5/21</span></td></tr>
+          <tr class="row-click"><td>請假單</td><td>5/19 病假</td><td>周志豪</td><td>05/19</td><td><span class="badge badge-green">已核准</span></td><td><span style="color:#9ca3af;font-size:12px">郭雅文 · 5/19</span></td></tr>
         </tbody>
       </table>
     </div>
   </div>
 </main>
 
+<!-- ===== MODALS ===== -->
+
+<!-- Task Modal -->
+<div id="task-modal" class="modal-overlay hidden" onclick="hideModal('task-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>新增工作</h3>
+    <label>工作內容</label><input type="text" placeholder="輸入工作內容">
+    <label>負責人</label><select><option>林柏翰</option><option>郭雅文</option><option>黃志誠</option><option>陳靜怡</option></select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div><label>優先度</label><select><option>一般</option><option>緊急</option></select></div>
+      <div><label>期限</label><input type="date"></div>
+    </div>
+    <label>備註</label><textarea placeholder="補充說明..."></textarea>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="hideModal('task-modal')">取消</button>
+      <button class="btn btn-primary" onclick="hideModal('task-modal');alert('✅ 工作已建立\n負責人已收到通知')">建立工作</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Modal -->
+<div id="upload-modal" class="modal-overlay hidden" onclick="hideModal('upload-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>上傳文件</h3>
+    <label>選擇資料夾</label><select><option>管理辦法</option><option>技術文件</option><option>人事行政</option><option>財務報表</option></select>
+    <label>檔案</label><input type="file" style="padding:6px">
+    <label>描述</label><textarea placeholder="文件說明..."></textarea>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="hideModal('upload-modal')">取消</button>
+      <button class="btn btn-primary" onclick="hideModal('upload-modal');alert('📁 文件已上傳至文件庫')">上傳</button>
+    </div>
+  </div>
+</div>
+
+<!-- Folder Modal -->
+<div id="folder-modal" class="modal-overlay hidden" onclick="hideModal('folder-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>新增資料夾</h3>
+    <label>資料夾名稱</label><input type="text" placeholder="輸入資料夾名稱">
+    <label>存取權限</label><select><option>全公司</option><option>僅限部門</option><option>僅限管理者</option></select>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="hideModal('folder-modal')">取消</button>
+      <button class="btn btn-primary" onclick="hideModal('folder-modal');alert('📁 資料夾已建立')">建立</button>
+    </div>
+  </div>
+</div>
+
+<!-- Folder Detail -->
+<div id="folder-detail-modal" class="modal-overlay hidden" onclick="hideModal('folder-detail-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>📂 管理辦法</h3>
+    <table style="margin-bottom:12px"><thead><tr><th>檔案名稱</th><th>大小</th><th>更新日期</th></tr></thead>
+    <tbody>
+      <tr><td>員工手冊 v3.2.pdf</td><td>2.4 MB</td><td>2026-05-20</td></tr>
+      <tr><td>資訊安全政策.pdf</td><td>1.1 MB</td><td>2026-05-15</td></tr>
+      <tr><td>差旅管理辦法.pdf</td><td>0.8 MB</td><td>2026-05-10</td></tr>
+      <tr><td>採購作業要點.pdf</td><td>1.6 MB</td><td>2026-05-08</td></tr>
+    </tbody></table>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="hideModal('folder-detail-modal')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- Announcement Modal -->
+<div id="announcement-modal" class="modal-overlay hidden" onclick="hideModal('announcement-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>📢 5/26 全體會議 — Q2 業績檢討</h3>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:12px">管理部 · 2026-05-24</p>
+    <p style="font-size:14px;line-height:1.7">各位同仁好，<br><br>謹訂於 5/26（一）上午 10:00 於 3F 大會議室舉行 Q2 業績檢討會議。請各部門主管準備 5 分鐘簡報。<br><br>議程：<br>1. Q2 業績回顧（10:00-10:30）<br>2. 各部門報告（10:30-11:30）<br>3. Q3 目標設定（11:30-12:00）<br><br>請準時出席，不克參加者請事先請假。</p>
+    <div class="actions"><button class="btn btn-secondary" onclick="hideModal('announcement-modal')">關閉</button></div>
+  </div>
+</div>
+
+<!-- Approval Modal -->
+<div id="approval-modal" class="modal-overlay hidden" onclick="hideModal('approval-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>提出簽核</h3>
+    <label>簽核類型</label><select><option>請假單</option><option>採購單</option><option>出差單</option><option>加班單</option><option>其他</option></select>
+    <label>主旨</label><input type="text" placeholder="輸入主旨">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div><label>日期</label><input type="date"></div>
+      <div><label>簽核人</label><select><option>郭雅文（課長）</option><option>黃志誠（經理）</option></select></div>
+    </div>
+    <label>說明</label><textarea placeholder="補充說明..."></textarea>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="hideModal('approval-modal')">取消</button>
+      <button class="btn btn-primary" onclick="hideModal('approval-modal');alert('✅ 簽核已送出\n簽核人會收到通知')">送出簽核</button>
+    </div>
+  </div>
+</div>
+
+<!-- Employee Detail -->
+<div id="employee-modal" class="modal-overlay hidden" onclick="hideModal('employee-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>👤 林柏翰</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;margin-bottom:16px">
+      <div><span style="color:#6b7280">部門</span><br>資訊課</div>
+      <div><span style="color:#6b7280">職稱</span><br>資深工程師</div>
+      <div><span style="color:#6b7280">分機</span><br>#201</div>
+      <div><span style="color:#6b7280">Email</span><br>lin.ph@company.tw</div>
+      <div><span style="color:#6b7280">手機</span><br>0912-345-678</div>
+      <div><span style="color:#6b7280">到職日</span><br>2024-03-15</div>
+    </div>
+    <div class="actions"><button class="btn btn-secondary" onclick="hideModal('employee-modal')">關閉</button></div>
+  </div>
+</div>
+
 <script>
-document.querySelectorAll('nav a').forEach(a => {
-  a.addEventListener('click', e => {
-    e.preventDefault();
-    document.querySelectorAll('nav a').forEach(x => x.classList.remove('active'));
-    a.classList.add('active');
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('view-' + a.dataset.view).classList.add('active');
-  });
+function switchTab(name){
+  document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
+  const tab=document.querySelector(`nav a[data-view="${name}"]`);
+  if(tab)tab.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const view=document.getElementById('view-'+name);
+  if(view)view.classList.add('active');
+}
+document.querySelectorAll('nav a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();switchTab(a.dataset.view)});
 });
+
+function showModal(id){document.getElementById(id).classList.remove('hidden')}
+function hideModal(id){document.getElementById(id).classList.add('hidden')}
+
+function approve(btn){
+  const row=btn.closest('tr');
+  const badge=row.querySelector('.badge');
+  badge.className='badge badge-green';
+  badge.textContent='已核准';
+  const td=row.querySelector('td:last-child');
+  td.innerHTML='<span style="color:#9ca3af;font-size:12px">林柏翰 · '+new Date().toLocaleDateString('zh-TW')+'</span>';
+}
+function reject(btn){
+  const row=btn.closest('tr');
+  const badge=row.querySelector('.badge');
+  badge.className='badge badge-red';
+  badge.textContent='已退回';
+  const td=row.querySelector('td:last-child');
+  td.innerHTML='<span style="color:#9ca3af;font-size:12px">林柏翰 · '+new Date().toLocaleDateString('zh-TW')+'</span>';
+}
 </script>
 </body>
 </html>
