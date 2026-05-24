@@ -4,3 +4,5 @@ node_modules/
 screenshots/
 target/
 *.csv
+dist/
+package-lock.json
